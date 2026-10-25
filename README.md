@@ -18,7 +18,7 @@ stora_contemporanea/
 
 ## Dashboard collegate
 
-| Argomento | Repo | Stato |
+| Argomento | Link | Stato |
 |---|---|---|
 | Prima guerra mondiale | [la-grande-guerra](https://vfbrugnola.github.io/storia_contemporanea/) | ✅ Disponibile |
 | Il fascismo | [il-fascismo](https://vfbrugnola.github.io/storia_contemporanea/il-fascismo-in-italia/) | ✅ Disponibile |
