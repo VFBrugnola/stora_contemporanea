@@ -3,7 +3,7 @@
 Pagina vetrina per i materiali didattici di storia contemporanea (XIX–XX secolo).
 Raccoglie e linka le dashboard interattive per argomento, con indicazione dello stato di ciascuna.
 
-**GitHub Pages:** https://vfbrugnola.github.io/stora_contemporanea/
+**GitHub Pages:** https://vfbrugnola.github.io/storia_contemporanea/
 
 ---
 
