@@ -5,6 +5,12 @@ Raccoglie e linka le dashboard interattive per argomento, con indicazione dello 
 
 **GitHub Pages:** https://vfbrugnola.github.io/storia_contemporanea/
 
+## Le dashboard
+### Come sono costruite?
+I contenuti derivano dal mio blog. Le varie dashboard sono sviluppate in vibecoding con Claude AI. Tutti i contenuti sono riletti e supervisionati.
+### Scopo delle dashboard
+Le dashboard hanno uno scopo didattico.
+
 ---
 
 ## Struttura del repo
