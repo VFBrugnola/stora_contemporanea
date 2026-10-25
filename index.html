@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storia Contemporanea</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@400;500;600&display=swap">
+
+<style>
+:root {
+  --bg:       #F5F0E8;
+  --bg2:      #EDE7D9;
+  --fg:       #1A1612;
+  --fg2:      #5C5044;
+  --accent:   #8B2E1A;
+  --accent2:  #C4491F;
+  --border:   #C9BEA8;
+  --ready:    #2D6A4F;
+  --wip:      #7B5E00;
+  --card-bg:  #FAF7F2;
+
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-ui:      'Inter', system-ui, sans-serif;
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:      #141210;
+    --bg2:     #1E1A17;
+    --fg:      #E8E0D4;
+    --fg2:     #9C9080;
+    --accent:  #C4491F;
+    --accent2: #E06030;
+    --border:  #3A3028;
+    --ready:   #4CAF82;
+    --wip:     #D4A020;
+    --card-bg: #1E1A17;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+    --bg:      #141210;
+    --bg2:     #1E1A17;
+    --fg:      #E8E0D4;
+    --fg2:     #9C9080;
+    --accent:  #C4491F;
+    --accent2: #E06030;
+    --border:  #3A3028;
+    --ready:   #4CAF82;
+    --wip:     #D4A020;
+    --card-bg: #1E1A17;
+    color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.5;
+  padding-left:  max(16px, env(safe-area-inset-left,  0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0;
+  min-height: 100%;
+}
+
+/* ── HEADER ── */
+.site-header {
+  border-bottom: 2px solid var(--accent);
+  padding-block: 2.5rem 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.header-inner {
+  max-width: 900px;
+  margin-inline: auto;
+}
+
+.site-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--fg);
+  text-wrap: balance;
+}
+
+.site-title em {
+  font-style: italic;
+  color: var(--accent);
+}
+
+.site-subtitle {
+  margin-top: 0.6rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-style: italic;
+  color: var(--fg2);
+}
+
+/* ── MAIN ── */
+.main {
+  max-width: 900px;
+  margin-inline: auto;
+  padding-bottom: 4rem;
+}
+
+/* ── CENTURY SECTION ── */
+.century { margin-bottom: 3.5rem; }
+
+.century-header {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.century-label {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.century-span {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--fg2);
+  letter-spacing: 0.06em;
+}
+
+/* ── CARD GRID ── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.85rem;
+}
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.2rem 1.3rem 1.1rem;
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
+  position: relative;
+  min-height: 110px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.card:hover:not(.card--placeholder) {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  transform: translateY(-2px);
+  border-color: var(--accent);
+}
+
+.card--placeholder {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.15rem;
+}
+
+.card-badge--ready { color: var(--ready); }
+.card-badge--wip   { color: var(--wip); }
+.card-badge--soon  { color: var(--fg2); }
+
+.card-badge::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--fg);
+  text-wrap: balance;
+}
+
+.card--placeholder .card-title {
+  font-weight: 400;
+  font-style: italic;
+}
+
+.card-desc {
+  font-size: 12.5px;
+  color: var(--fg2);
+  line-height: 1.45;
+}
+
+.card-arrow {
+  position: absolute;
+  bottom: 1rem;
+  right: 1.1rem;
+  font-size: 1.1rem;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 0.15s, transform 0.15s;
+  transform: translateX(-4px);
+}
+
+.card:hover:not(.card--placeholder) .card-arrow {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── LEGEND ── */
+.legend {
+  margin-top: 2.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 12px;
+  color: var(--fg2);
+}
+
+.legend-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.legend-dot--ready { background: var(--ready); }
+.legend-dot--wip   { background: var(--wip); }
+.legend-dot--soon  { background: var(--fg2); opacity: 0.5; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <h1 class="site-title">Storia <em>Contemporanea</em></h1>
+    <p class="site-subtitle">Materiali didattici per il liceo — XIX e XX secolo</p>
+  </div>
+</header>
+
+<main class="main">
+
+  <!-- XIX SECOLO -->
+  <section class="century">
+    <div class="century-header">
+      <h2 class="century-label">XIX Secolo</h2>
+      <span class="century-span">1815 – 1914</span>
+    </div>
+    <div class="cards">
+
+      <div class="card card--placeholder">
+        <span class="card-badge card-badge--soon">In arrivo</span>
+        <span class="card-title">Restaurazione e Congresso di Vienna</span>
+      </div>
+
+      <div class="card card--placeholder">
+        <span class="card-badge card-badge--soon">In arrivo</span>
+        <span class="card-title">I moti rivoluzionari</span>
+        <span class="card-desc">1820, 1830, 1848</span>
+      </div>
+
+      <div class="card card--placeholder">
+        <span class="card-badge card-badge--soon">In arrivo</span>
+        <span class="card-title">Risorgimento italiano</span>
+      </div>
+
+      <div class="card card--placeholder">
+        <span class="card-badge card-badge--soon">In arrivo</span>
+        <span class="card-title">Questione sociale e marxismo</span>
+      </div>
+
+      <div class="card card--placeholder">
+        <span class="card-badge card-badge--soon">In arrivo</span>
+        <span class="card-title">Imperialismo e colonialismo</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- XX SECOLO -->
+  <section class="century">
+    <div class="century-header">
+      <h2 class="century-label">XX Secolo</h2>
+      <span class="century-span">1900 – 2000</span>
+    </div>
+    <div class="cards">
+
+      <a class="card" href="https://vfbrugnola.github.io/la-grande-guerra/">
+        <span class="card-badge card-badge--ready">Disponibile</span>
+        <span class="card-title">Prima guerra mondiale</span>
+        <span class="card-desc">1914–1918 · Mappa interattiva, fronti, perdite</span>
+        <span class="card-arrow">→</span>
+      </a>
+
+      <div class="card card--placeholder">
+        <span class="card-badge card-badge--soon">In arrivo</span>
+        <span class="card-title">Rivoluzione russa</span>
+        <span class="card-desc">1917</span>
+      </div>
+
+      <div class="card card--placeholder">
+        <span class="card-badge card-badge--wip">In lavorazione</span>
+        <span class="card-title">Il fascismo</span>
+        <span class="card-desc">Origini, regime, ideologia</span>
+      </div>
+
+      <div class="card card--placeholder">
+        <span class="card-badge card-badge--soon">In arrivo</span>
+        <span class="card-title">Nazismo e totalitarismi</span>
+      </div>
+
+      <a class="card" href="https://vfbrugnola.github.io/la-seconda-guerra-mondiale/">
+        <span class="card-badge card-badge--ready">Disponibile</span>
+        <span class="card-title">Seconda guerra mondiale</span>
+        <span class="card-desc">1939–1945 · Fronti, Shoah, leader</span>
+        <span class="card-arrow">→</span>
+      </a>
+
+      <div class="card card--placeholder">
+        <span class="card-badge card-badge--soon">In arrivo</span>
+        <span class="card-title">Guerra fredda</span>
+        <span class="card-desc">1947–1991</span>
+      </div>
+
+      <div class="card card--placeholder">
+        <span class="card-badge card-badge--soon">In arrivo</span>
+        <span class="card-title">Decolonizzazione</span>
+      </div>
+
+      <div class="card card--placeholder">
+        <span class="card-badge card-badge--soon">In arrivo</span>
+        <span class="card-title">Italia repubblicana</span>
+        <span class="card-desc">1946–2000</span>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot legend-dot--ready"></span> Dashboard disponibile</span>
+    <span class="legend-item"><span class="legend-dot legend-dot--wip"></span> In lavorazione</span>
+    <span class="legend-item"><span class="legend-dot legend-dot--soon"></span> In arrivo</span>
+  </div>
+
+</main>
+
+</body>
+</html>
