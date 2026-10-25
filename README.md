@@ -22,7 +22,7 @@ stora_contemporanea/
 |---|---|---|
 | Prima guerra mondiale | [la-grande-guerra](https://vfbrugnola.github.io/storia_contemporanea/) | ✅ Disponibile |
 | Il fascismo | [il-fascismo](https://vfbrugnola.github.io/storia_contemporanea/il-fascismo-in-italia/) | ✅ Disponibile |
-| Seconda guerra mondiale | [la-seconda-guerra-mondiale](https://github.com/VFBrugnola/la-seconda-guerra-mondiale) | ✅ Disponibile |
+| Seconda guerra mondiale | [la-seconda-guerra-mondiale](https://vfbrugnola.github.io/storia_contemporanea/la-seconda-guerra-mondiale/) | ✅ Disponibile |
 
 ## Sistema CSS condiviso
 
