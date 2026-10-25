@@ -21,7 +21,7 @@ stora_contemporanea/
 | Argomento | Repo | Stato |
 |---|---|---|
 | Prima guerra mondiale | [la-grande-guerra](https://github.com/VFBrugnola/la-grande-guerra) | ✅ Disponibile |
-| Il fascismo | *(in costruzione)* | 🔧 In lavorazione |
+| Il fascismo | [il-fascismo](https://vfbrugnola.github.io/storia_contemporanea/il-fascismo-in-italia/) | ✅ Disponibile |
 | Seconda guerra mondiale | [la-seconda-guerra-mondiale](https://github.com/VFBrugnola/la-seconda-guerra-mondiale) | ✅ Disponibile |
 
 ## Sistema CSS condiviso
