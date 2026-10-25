@@ -60,4 +60,3 @@ Poi nella `:root` della dashboard si ridefiniscono solo i token di colore:
 
 ---
 
-*Materiali per il liceo — IS Bertrand Russell, Guastalla*
