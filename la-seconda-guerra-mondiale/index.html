@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Seconda Guerra Mondiale — Mappa Interattiva</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="data/borders_1939.js"></script>
+<script src="data/nations.js"></script>
+<script src="data/events.js"></script>
+<script src="data/fronts.js"></script>
+<script src="data/movements.js"></script>
+<script src="data/periods.js"></script>
+<script src="data/weapons.js"></script>
+<script src="data/shoah.js"></script>
+<script src="data/leaders.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0d0d0d;color:#e8e8e8;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* HEADER */
+.header-crumb{font-size:0.58rem;letter-spacing:0.09em;text-transform:uppercase;color:rgba(200,150,100,0.45);text-decoration:none;white-space:nowrap;transition:color 0.15s;flex-shrink:0}
+.header-crumb:hover{color:rgba(200,150,100,0.85);}
+#header{background:linear-gradient(135deg,#1a0000 0%,#2d0000 50%,#1a0a00 100%);border-bottom:2px solid #8B0000;padding:8px 16px;display:flex;align-items:center;gap:16px;flex-shrink:0}
+#header h1{font-size:1.1rem;font-weight:700;color:#e8d5b7;letter-spacing:1px}
+#header h1 span{color:#c0392b;font-size:1.3rem}
+#periodo-label{font-size:0.8rem;color:#a89070;margin-left:auto}
+
+/* TABS */
+#tabs{display:flex;background:#111;border-bottom:1px solid #333;flex-shrink:0}
+.tab{padding:8px 18px;cursor:pointer;font-size:0.82rem;color:#888;border-bottom:2px solid transparent;transition:all .2s}
+.tab:hover{color:#ccc;background:#1a1a1a}
+.tab.active{color:#e8d5b7;border-bottom-color:#8B0000;background:#1a1a1a}
+
+/* LAYOUT PRINCIPALE */
+#main{flex:1;display:flex;overflow:hidden}
+#map{flex:1;z-index:1}
+
+/* PANNELLO LATERALE */
+#side{width:320px;background:#111;border-left:1px solid #2a2a2a;overflow-y:auto;flex-shrink:0;display:flex;flex-direction:column}
+#side-content{flex:1;padding:12px}
+
+/* SLIDER */
+#slider-wrap{background:#0a0a0a;border-top:1px solid #2a2a2a;padding:10px 14px;flex-shrink:0}
+#slider-wrap label{font-size:0.75rem;color:#888;display:block;margin-bottom:4px}
+#time-slider{width:100%;accent-color:#8B0000;cursor:pointer}
+#time-display{font-size:0.85rem;color:#e8d5b7;font-weight:600;text-align:center;margin-top:4px}
+
+/* PERIODI */
+#periodi-wrap{background:#0a0a0a;border-top:1px solid #2a2a2a;padding:8px 14px;flex-shrink:0;display:flex;flex-wrap:wrap;gap:4px}
+.periodo-btn{font-size:0.68rem;padding:3px 8px;border:1px solid #444;background:#1a1a1a;color:#999;border-radius:3px;cursor:pointer;transition:all .2s}
+.periodo-btn:hover{border-color:#8B0000;color:#e8d5b7}
+.periodo-btn.active{background:#8B0000;color:#fff;border-color:#8B0000}
+
+/* LEGENDA */
+#legenda{background:#0d0d0d;border-top:1px solid #2a2a2a;padding:8px 14px;flex-shrink:0}
+.leg-row{display:flex;align-items:center;gap:6px;margin-bottom:3px;font-size:0.72rem;color:#999}
+.leg-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.leg-line{width:20px;height:3px;flex-shrink:0}
+
+/* CONTENUTO PANNELLO */
+#side-content h3{font-size:0.85rem;color:#e8d5b7;margin-bottom:8px;border-bottom:1px solid #333;padding-bottom:4px}
+.evento-card{background:#1a1a1a;border:1px solid #333;border-left:3px solid #8B0000;border-radius:4px;padding:8px;margin-bottom:6px}
+.evento-card h4{font-size:0.78rem;color:#e8d5b7;margin-bottom:4px}
+.evento-card p{font-size:0.72rem;color:#aaa;line-height:1.4}
+.evento-meta{font-size:0.68rem;color:#666;margin-top:4px}
+
+/* TAB ARMAMENTI */
+#tab-armi{display:none;padding:12px}
+.arma-card{background:#1a1a1a;border:1px solid #333;border-radius:6px;margin-bottom:10px;overflow:hidden;cursor:pointer;transition:border-color .2s}
+.arma-card:hover{border-color:#8B0000}
+.arma-card-inner{display:flex;gap:10px;padding:10px}
+.arma-img{width:70px;height:50px;object-fit:cover;border-radius:3px;background:#333;flex-shrink:0}
+.arma-info h4{font-size:0.8rem;color:#e8d5b7;margin-bottom:2px}
+.arma-info p{font-size:0.7rem;color:#888}
+.arma-badge{font-size:0.62rem;display:inline-block;padding:1px 5px;border-radius:2px;margin-top:3px}
+.badge-terra{background:#5d4037;color:#d7ccc8}
+.badge-aria{background:#1565c0;color:#bbdefb}
+.badge-mare{background:#00695c;color:#b2dfdb}
+.badge-nucleare{background:#880e4f;color:#f8bbd0}
+.badge-missilistica{background:#4a148c;color:#e1bee7}
+.badge-tecnologia{background:#37474f;color:#cfd8dc}
+
+/* MODAL ARMI */
+#modal-arma{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center}
+#modal-arma.open{display:flex}
+#modal-inner{background:#1a1a1a;border:1px solid #555;border-radius:8px;max-width:520px;width:90%;padding:20px;position:relative}
+#modal-img{width:100%;height:180px;object-fit:cover;border-radius:4px;margin-bottom:12px;background:#333}
+#modal-close{position:absolute;top:10px;right:12px;background:none;border:none;color:#888;font-size:1.4rem;cursor:pointer}
+#modal-close:hover{color:#fff}
+#modal-title{font-size:1rem;color:#e8d5b7;margin-bottom:4px}
+#modal-meta{font-size:0.72rem;color:#888;margin-bottom:10px}
+#modal-desc{font-size:0.78rem;color:#ccc;line-height:1.6}
+
+/* TAB SHOAH */
+#tab-shoah{display:none;flex-direction:column;height:100%}
+#shoah-map{flex:1;min-height:300px}
+#shoah-side{padding:12px;overflow-y:auto;max-height:300px}
+.shoah-card{background:#1a0000;border:1px solid #5a0000;border-radius:4px;padding:8px;margin-bottom:6px;cursor:pointer;transition:border-color .2s}
+.shoah-card:hover{border-color:#c0392b}
+.shoah-card h4{font-size:0.78rem;color:#f5c6c6;margin-bottom:3px}
+.shoah-card p{font-size:0.7rem;color:#c89090;line-height:1.4}
+.shoah-tipo{font-size:0.64rem;display:inline-block;padding:1px 6px;border-radius:2px;margin-bottom:4px}
+.tipo-sterminio{background:#111111;color:#ffcdd2}
+.tipo-lavoro{background:#4E342E;color:#ffe0b2}
+.tipo-transito{background:#616161;color:#e0e0e0}
+
+/* TAB PERDITE */
+#tab-perdite{display:none;padding:16px;overflow-y:auto}
+#tab-perdite h3{color:#e8d5b7;margin-bottom:12px;font-size:0.9rem}
+.perdita-bar-wrap{margin-bottom:16px}
+.perdita-label{display:flex;justify-content:space-between;margin-bottom:3px;font-size:0.75rem;color:#aaa}
+.perdita-bar-outer{height:20px;background:#1a1a1a;border-radius:3px;overflow:hidden;border:1px solid #333}
+.perdita-bar{height:100%;transition:width 1s ease;display:flex;align-items:center;padding-left:6px;font-size:0.65rem;color:rgba(255,255,255,.8)}
+
+/* TAB LEADER */
+#tab-leader{display:none;padding:12px;overflow-y:auto}
+.leader-card{background:#1a1a1a;border:1px solid #333;border-radius:6px;margin-bottom:10px;overflow:hidden;display:flex;gap:0}
+.leader-img-wrap{width:80px;flex-shrink:0}
+.leader-img{width:80px;height:90px;object-fit:cover;object-position:top;background:#333}
+.leader-info{padding:10px;flex:1}
+.leader-info h4{font-size:0.8rem;color:#e8d5b7;margin-bottom:2px}
+.leader-info .ruolo{font-size:0.67rem;color:#8B0000;margin-bottom:5px}
+.leader-info p{font-size:0.7rem;color:#999;line-height:1.4}
+
+/* POPUP MAPPA */
+.leaflet-popup-content-wrapper{background:#1a1a1a;border:1px solid #444;color:#e8e8e8;border-radius:6px}
+.leaflet-popup-tip{background:#1a1a1a}
+.popup-title{font-size:0.85rem;font-weight:700;color:#e8d5b7;margin-bottom:6px}
+.popup-badge{display:inline-block;padding:1px 7px;border-radius:10px;font-size:0.66rem;margin-bottom:6px}
+.popup-desc{font-size:0.73rem;color:#ccc;line-height:1.4;margin-bottom:6px}
+.popup-morti{font-size:0.7rem;color:#e07070;margin-top:4px}
+.popup-bar-wrap{margin-top:4px}
+.popup-bar{height:8px;border-radius:2px;margin-bottom:2px;display:flex;align-items:center}
+
+/* NAZIONE POPUP */
+.popup-nazione h3{font-size:0.9rem;color:#e8d5b7;margin-bottom:6px}
+.popup-nazione .schieramento{font-size:0.7rem;display:inline-block;padding:2px 8px;border-radius:3px;margin-bottom:6px}
+.asse-badge{background:#8B0000;color:#fdd}
+.alleati-badge{background:#00447a;color:#d0e8ff}
+.neutrale-badge{background:#444;color:#ccc}
+.popup-nazione p{font-size:0.73rem;color:#bbb;line-height:1.5}
+
+/* HOVER NAZIONE */
+.leaflet-tooltip{background:#1a1a1a;border:1px solid #555;color:#e8e8e8;font-size:0.75rem}
+
+/* scrollbar */
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:#111}::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+
+/* FILTRI TEATRI */
+#filtri-teatri{background:#0a0a0a;border-top:1px solid #2a2a2a;padding:6px 14px;flex-shrink:0;display:flex;flex-wrap:wrap;gap:3px}
+.teatro-btn{font-size:0.65rem;padding:2px 7px;border:1px solid #333;background:#0d0d0d;color:#777;border-radius:3px;cursor:pointer;transition:all .2s}
+.teatro-btn.active{background:#1a1a2a;border-color:#4a4a8a;color:#a0a0ff}
+.teatro-btn[data-teatro="fronte_est"].active{background:#2a1a0a;border-color:#8a4a00;color:#ffaa44}
+.teatro-btn[data-teatro="nordafrica"].active{background:#2a2a0a;border-color:#7a7a00;color:#ffee44}
+.teatro-btn[data-teatro="italiano"].active{background:#0a1a2a;border-color:#006688;color:#44aaff}
+.teatro-btn[data-teatro="pacifico"].active{background:#0a2a1a;border-color:#006830;color:#44ff88}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <a href="../" class="header-crumb">← Storia Contemporanea</a>
+  <div>
+    <h1><span>⚔</span> La Seconda Guerra Mondiale</h1>
+  </div>
+  <div id="periodo-label">settembre 1939 — settembre 1945</div>
+</div>
+
+<div id="tabs">
+  <div class="tab active" data-tab="mappa">🗺 Mappa</div>
+  <div class="tab" data-tab="armi">⚙ Armamenti</div>
+  <div class="tab" data-tab="shoah">✡ Shoah</div>
+  <div class="tab" data-tab="perdite">📊 Perdite</div>
+  <div class="tab" data-tab="leader">👤 Leader</div>
+</div>
+
+<!-- TAB MAPPA -->
+<div id="tab-mappa" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+  <div id="main">
+    <div id="map"></div>
+    <div id="side">
+      <div id="side-content">
+        <h3 id="side-title">Seleziona un paese o un evento</h3>
+        <div id="side-body"><p style="font-size:0.75rem;color:#666">Usa lo slider per navigare nel tempo. Clicca su un paese o un evento per i dettagli.</p></div>
+      </div>
+      <div id="legenda">
+        <div style="font-size:0.7rem;color:#777;margin-bottom:5px;font-weight:600">SCHIERAMENTI</div>
+        <div class="leg-row"><div class="leg-dot" style="background:#6e1e1e"></div>Asse (Germania, Italia, Giappone...)</div>
+        <div class="leg-row"><div class="leg-dot" style="background:#1e3a6e"></div>Alleati (UK, Francia, URSS, USA...)</div>
+        <div class="leg-row"><div class="leg-dot" style="background:#2a2a30"></div>Neutrali</div>
+        <div style="font-size:0.7rem;color:#777;margin:5px 0 3px;font-weight:600">FRONTI</div>
+        <div class="leg-row"><div class="leg-line" style="background:#c0392b"></div>Fronte Occidentale</div>
+        <div class="leg-row"><div class="leg-line" style="background:#e67e22"></div>Fronte Est</div>
+        <div class="leg-row"><div class="leg-line" style="background:#d4ac0d"></div>Nord Africa</div>
+        <div class="leg-row"><div class="leg-line" style="background:#2980b9"></div>Fronte Italiano</div>
+      </div>
+      <div id="filtri-teatri">
+        <span style="font-size:0.65rem;color:#666;align-self:center;margin-right:3px">Teatri:</span>
+        <button class="teatro-btn active" data-teatro="tutti">Tutti</button>
+        <button class="teatro-btn" data-teatro="europa_occ">Occidente</button>
+        <button class="teatro-btn" data-teatro="fronte_est">Est</button>
+        <button class="teatro-btn" data-teatro="nordafrica">N.Africa</button>
+        <button class="teatro-btn" data-teatro="italiano">Italia</button>
+        <button class="teatro-btn" data-teatro="pacifico">Pacifico</button>
+      </div>
+      <div id="periodi-wrap"></div>
+      <div id="slider-wrap">
+        <label>Navigazione temporale</label>
+        <input type="range" id="time-slider" min="0" max="72" value="0">
+        <div id="time-display">Settembre 1939</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB ARMAMENTI -->
+<div id="tab-armi" style="flex:1;overflow-y:auto"></div>
+
+<!-- TAB SHOAH -->
+<div id="tab-shoah" style="flex:1;display:none;flex-direction:column;overflow:hidden">
+  <div id="shoah-map" style="flex:1"></div>
+  <div id="shoah-side" style="height:280px;overflow-y:auto;background:#0d0000;border-top:2px solid #7b0000;padding:12px">
+    <h3 style="color:#f5c6c6;font-size:0.85rem;margin-bottom:6px">La Shoah — Luoghi della Memoria</h3>
+    <div style="display:flex;gap:14px;margin-bottom:10px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:5px;font-size:0.68rem;color:#ccc">
+        <svg width="12" height="10" viewBox="0 0 100 87"><polygon points="50,87 0,0 100,0" fill="#111111" stroke="#555" stroke-width="8"/></svg>
+        Campo di sterminio
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:0.68rem;color:#ccc">
+        <svg width="12" height="10" viewBox="0 0 100 87"><polygon points="50,87 0,0 100,0" fill="#4E342E" stroke="#a07060" stroke-width="8"/></svg>
+        Campo di lavoro
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:0.68rem;color:#ccc">
+        <svg width="12" height="10" viewBox="0 0 100 87"><polygon points="50,87 0,0 100,0" fill="#757575" stroke="#bbb" stroke-width="8"/></svg>
+        Campo di transito
+      </div>
+    </div>
+    <div id="shoah-list"></div>
+  </div>
+</div>
+
+<!-- TAB PERDITE -->
+<div id="tab-perdite" style="flex:1;display:none;overflow-y:auto;padding:16px">
+  <h3 style="color:#e8d5b7;margin-bottom:4px">Vittime della Seconda Guerra Mondiale</h3>
+  <p style="font-size:0.72rem;color:#666;margin-bottom:16px">Le stime variano tra le fonti storiche. Questi dati sono approssimazioni basate sulle ricerche più accreditate.</p>
+  <div id="perdite-chart"></div>
+</div>
+
+<!-- TAB LEADER -->
+<div id="tab-leader" style="flex:1;display:none;overflow-y:auto;padding:12px"></div>
+
+<!-- MODAL ARMI -->
+<div id="modal-arma">
+  <div id="modal-inner">
+    <button id="modal-close">×</button>
+    <img id="modal-img" src="" alt="">
+    <div id="modal-title"></div>
+    <div id="modal-meta"></div>
+    <div id="modal-desc"></div>
+  </div>
+</div>
+
+<script>
+// ─── COSTANTI TEMPORALI ───────────────────────────────────────────────────
+var START_YEAR=1939, START_MONTH=9, TOTAL_MONTHS=73;
+
+function monthToLabel(idx){
+  var d=new Date(START_YEAR,START_MONTH-1+idx);
+  return d.toLocaleDateString('it-IT',{month:'long',year:'numeric'});
+}
+function monthToYYYYMM(idx){
+  var d=new Date(START_YEAR,START_MONTH-1+idx);
+  var m=d.getMonth()+1;
+  return d.getFullYear()+'-'+(m<10?'0':'')+m;
+}
+function YYYYMMtoIdx(s){
+  var parts=s.split('-');
+  var y=parseInt(parts[0]),m=parseInt(parts[1]);
+  return (y-START_YEAR)*12+(m-START_MONTH);
+}
+
+// ─── MAPPE ────────────────────────────────────────────────────────────────
+var map, shoahMap;
+var bordersLayer, eventsLayer, frontsLayer, movementsLayer;
+var currentMonth=0, currentTeatro='tutti';
+
+function initMap(){
+  map=L.map('map',{center:[50,15],zoom:4,zoomControl:true,attributionControl:false});
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+    {maxZoom:17,attribution:'ESRI'}).addTo(map);
+
+  bordersLayer=L.layerGroup().addTo(map);
+  frontsLayer=L.layerGroup().addTo(map);
+  movementsLayer=L.layerGroup().addTo(map);
+  eventsLayer=L.layerGroup().addTo(map);
+
+  renderBorders();
+  renderFronts(monthToYYYYMM(0));
+  renderEvents(monthToYYYYMM(0));
+  buildPeriodButtons();
+}
+
+// ─── COLORI SCHIERAMENTO ──────────────────────────────────────────────────
+function getColor(nation, yyyymm){
+  // aggiornamenti schieramento nel tempo
+  var y=parseInt(yyyymm.split('-')[0]);
+  var m=parseInt(yyyymm.split('-')[1]);
+  var n=nation.toLowerCase();
+
+  if(n==='urss'||n==='soviet union'||n==='ussr'){
+    if(y<1941||(y===1941&&m<6)) return '#4a2a4a'; // neutrale/ostile
+    return '#1e3a6e'; // alleati dal 1941
+  }
+  if(n==='united states'||n==='usa'){
+    if(y<1941||(y===1941&&m<12)) return '#2a2a30';
+    return '#1e3a6e';
+  }
+  if(n==='italy'||n==='italia'){
+    if(y>1943||(y===1943&&m>=9)) return '#1e3a6e';
+    return '#6e1e1e';
+  }
+  if(n==='romania'){
+    if(y>1944||(y===1944&&m>=8)) return '#1e3a6e';
+    return '#6e1e1e';
+  }
+  if(n==='bulgaria'){
+    if(y<1941||(y===1941&&m<3)) return '#2a2a30';
+    if(y>1944||(y===1944&&m>=9)) return '#1e3a6e';
+    return '#6e1e1e';
+  }
+  if(n==='hungary'){
+    if(y>1944||(y===1944&&m>=10)) return '#1e3a6e';
+    return '#6e1e1e';
+  }
+  if(n==='finland'){
+    if(y===1940||(y===1941&&m>=6)||y===1942||y===1943||(y===1944&&m<9)) return '#6e1e1e';
+    return '#2a2a30';
+  }
+
+  var schieramento=(function(){
+    if(!BORDERS_1939||!BORDERS_1939.features) return 'neutrale';
+    for(var i=0;i<BORDERS_1939.features.length;i++){
+      var f=BORDERS_1939.features[i];
+      if(f.properties.NAME&&f.properties.NAME.toLowerCase()===n){
+        return f.properties.schieramento||'neutrale';
+      }
+    }
+    return 'neutrale';
+  })();
+
+  if(schieramento==='asse') return '#6e1e1e';
+  if(schieramento==='alleati') return '#1e3a6e';
+  return '#2a2a30';
+}
+
+function renderBorders(){
+  bordersLayer.clearLayers();
+  if(!BORDERS_1939||!BORDERS_1939.features) return;
+  var yyyymm=monthToYYYYMM(currentMonth);
+  BORDERS_1939.features.forEach(function(f){
+    var name=f.properties.NAME||'';
+    var col=getColor(name,yyyymm);
+    var layer=L.geoJSON(f,{
+      style:{fillColor:col,fillOpacity:0.55,color:'#000',weight:0.6,opacity:0.5}
+    });
+    layer.on('mouseover',function(e){
+      e.target.setStyle({fillOpacity:0.75,weight:1.5,color:'#aaa'});
+      e.target.bindTooltip('<strong>'+name+'</strong>',{sticky:true}).openTooltip(e.latlng);
+    });
+    layer.on('mouseout',function(e){
+      e.target.setStyle({fillOpacity:0.55,weight:0.6,color:'#000'});
+      e.target.closeTooltip();
+    });
+    layer.on('click',function(){showNationPanel(name,yyyymm);});
+    bordersLayer.addLayer(layer);
+  });
+}
+
+function showNationPanel(name,yyyymm){
+  var nation=null;
+  for(var i=0;i<NATIONS.length;i++){
+    if(NATIONS[i].name.toLowerCase()===name.toLowerCase()||
+       name.toLowerCase().indexOf(NATIONS[i].name.toLowerCase())>=0){
+      nation=NATIONS[i]; break;
+    }
+  }
+  var y=parseInt(yyyymm.split('-')[0]);
+  var sch=getColor(name,yyyymm);
+  var schLabel=sch==='#6e1e1e'?'Asse':sch==='#1e3a6e'?'Alleati':'Neutrale';
+  var schClass=sch==='#6e1e1e'?'asse-badge':sch==='#1e3a6e'?'alleati-badge':'neutrale-badge';
+  var desc=nation?(nation.desc[y]||nation.desc['1939']||''):'';
+  var perditeHtml='';
+  if(nation&&nation.perdite){
+    var tot=(nation.perdite.militari||0)+(nation.perdite.civili||0);
+    perditeHtml='<div style="margin-top:8px;font-size:0.7rem;color:#e07070">Perdite totali stimate: ~'+
+      (tot/1000000).toFixed(1)+' milioni</div>';
+  }
+  document.getElementById('side-title').textContent=name;
+  document.getElementById('side-body').innerHTML=
+    '<div class="popup-nazione">'+
+    '<span class="schieramento '+schClass+'">'+schLabel+'</span>'+
+    (desc?'<p style="font-size:0.75rem;color:#bbb;line-height:1.5;margin-top:6px">'+desc+'</p>':'')+
+    perditeHtml+'</div>';
+}
+
+// ─── FRONTI ───────────────────────────────────────────────────────────────
+function getFrontsForMonth(yyyymm){
+  if(!FRONTS) return [];
+  var idx=YYYYMMtoIdx(yyyymm);
+  var byFronte={};
+  FRONTS.forEach(function(fr){
+    var fIdx=YYYYMMtoIdx(fr.mese);
+    if(fIdx>idx) return;
+    if(currentTeatro!=='tutti'&&fr.fronte!==currentTeatro) return;
+    if(!byFronte[fr.fronte]||YYYYMMtoIdx(byFronte[fr.fronte].mese)<fIdx){
+      byFronte[fr.fronte]=fr;
+    }
+  });
+  return Object.values(byFronte);
+}
+
+function renderFronts(yyyymm){
+  frontsLayer.clearLayers();
+  if(typeof FRONTS==='undefined') return;
+  getFrontsForMonth(yyyymm).forEach(function(fr){
+    var pts=fr.coordinates.map(function(c){return[c[1],c[0]];});
+    var shadow=L.polyline(pts,{color:'#000',weight:7,opacity:0.4});
+    frontsLayer.addLayer(shadow);
+    var line=L.polyline(pts,{color:fr.colore,weight:4,opacity:1});
+    line.bindTooltip('<strong>'+fr.label+'</strong>',{sticky:true,className:'leaflet-tooltip'});
+    frontsLayer.addLayer(line);
+  });
+  // Movimenti
+  movementsLayer.clearLayers();
+  if(typeof MOVEMENTS==='undefined') return;
+  var mIdx=YYYYMMtoIdx(yyyymm);
+  MOVEMENTS.forEach(function(mv){
+    var mvIdx=YYYYMMtoIdx(mv.mese);
+    if(Math.abs(mvIdx-mIdx)>3) return;
+    var pts=mv.coordinates.map(function(c){return[c[1],c[0]];});
+    var arrow=L.polyline(pts,{color:mv.colore,weight:2.5,opacity:0.8,dashArray:'8,4'});
+    movementsLayer.addLayer(arrow);
+    // Punta freccia all'ultimo punto
+    var last=pts[pts.length-1], prev=pts[pts.length-2];
+    if(prev){
+      var angle=Math.atan2(last[1]-prev[1],last[0]-prev[0])*180/Math.PI;
+      var marker=L.marker(last,{icon:L.divIcon({
+        html:'<div style="width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:14px solid '+mv.colore+';transform:rotate('+(angle-90)+'deg);transform-origin:8px 14px;opacity:0.9"></div>',
+        iconSize:[16,14],iconAnchor:[8,14],className:''
+      })});
+      movementsLayer.addLayer(marker);
+    }
+  });
+}
+
+// ─── EVENTI ───────────────────────────────────────────────────────────────
+var TIPO_ICONE={'bellico':'⚔','diplomatico':'📜','navale':'⚓','atrocita':'⚠','nucleare':'☢'};
+var TIPO_COLORI={'bellico':'#c0392b','diplomatico':'#2980b9','navale':'#1abc9c','atrocita':'#8e44ad','nucleare':'#e67e22'};
+
+function getEventsForMonth(yyyymm){
+  if(!EVENTS) return [];
+  var idx=YYYYMMtoIdx(yyyymm);
+  return EVENTS.filter(function(e){
+    var eIdx=YYYYMMtoIdx(e.anno.substring(0,7));
+    var diff=idx-eIdx;
+    if(diff<0||diff>3) return false;
+    if(currentTeatro!=='tutti'&&e.teatro!==currentTeatro&&e.teatro!=='europa'&&e.teatro!=='diplomatico') return false;
+    return true;
+  });
+}
+
+function renderEvents(yyyymm){
+  eventsLayer.clearLayers();
+  var evts=getEventsForMonth(yyyymm);
+  var sideEvts=[];
+
+  // Tutti gli eventi entro 6 mesi
+  var idx=YYYYMMtoIdx(yyyymm);
+  EVENTS.forEach(function(e){
+    var eIdx=YYYYMMtoIdx(e.anno.substring(0,7));
+    if(idx-eIdx>=0&&idx-eIdx<=6) sideEvts.push(e);
+  });
+
+  evts.forEach(function(e){
+    var col=TIPO_COLORI[e.tipo]||'#888';
+    var ico=TIPO_ICONE[e.tipo]||'●';
+    var marker=L.marker([e.lat,e.lng],{icon:L.divIcon({
+      html:'<div style="background:'+col+';color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:13px;border:2px solid #fff;box-shadow:0 0 6px rgba(0,0,0,.6)">'+ico+'</div>',
+      iconSize:[26,26],iconAnchor:[13,13],className:''
+    })});
+
+    var mortiHtml='';
+    if(e.morti&&Object.keys(e.morti).length){
+      var max=Math.max.apply(null,Object.values(e.morti));
+      mortiHtml='<div class="popup-bar-wrap">';
+      Object.entries(e.morti).forEach(function(kv){
+        var pct=max>0?Math.round(kv[1]/max*100):0;
+        mortiHtml+='<div style="display:flex;align-items:center;gap:4px;margin-bottom:2px"><span style="font-size:0.65rem;color:#aaa;width:55px;flex-shrink:0">'+kv[0]+'</span><div style="flex:1;height:8px;background:#333;border-radius:2px"><div style="width:'+pct+'%;height:100%;background:'+col+';border-radius:2px"></div></div><span style="font-size:0.65rem;color:#aaa;margin-left:4px">'+kv[1].toLocaleString()+'</span></div>';
+      });
+      mortiHtml+='</div>';
+    }
+
+    marker.bindPopup(
+      '<div class="popup-title">'+e.titolo+'</div>'+
+      '<span class="popup-badge" style="background:'+col+'20;color:'+col+'">'+e.tipo+'</span>'+
+      '<div class="popup-desc">'+e.desc+'</div>'+mortiHtml,
+      {maxWidth:260}
+    );
+    eventsLayer.addLayer(marker);
+  });
+
+  // Pannello laterale eventi
+  if(sideEvts.length>0){
+    document.getElementById('side-title').textContent='Eventi del periodo';
+    document.getElementById('side-body').innerHTML=sideEvts.map(function(e){
+      var col=TIPO_COLORI[e.tipo]||'#888';
+      return '<div class="evento-card" style="border-left-color:'+col+'">'+
+        '<h4>'+e.titolo+'</h4>'+
+        '<p>'+e.desc.substring(0,140)+(e.desc.length>140?'...':'')+'</p>'+
+        '<div class="evento-meta">'+e.anno+'</div></div>';
+    }).join('');
+  }
+}
+
+// ─── SLIDER ───────────────────────────────────────────────────────────────
+var slider=document.getElementById('time-slider');
+slider.max=TOTAL_MONTHS-1;
+slider.addEventListener('input',function(){
+  currentMonth=parseInt(this.value);
+  var yyyymm=monthToYYYYMM(currentMonth);
+  document.getElementById('time-display').textContent=monthToLabel(currentMonth);
+  renderBorders();
+  renderFronts(yyyymm);
+  renderEvents(yyyymm);
+  updateActivePeriod(yyyymm);
+});
+
+// ─── PERIODI ──────────────────────────────────────────────────────────────
+function buildPeriodButtons(){
+  var wrap=document.getElementById('periodi-wrap');
+  PERIODS.forEach(function(p){
+    var btn=document.createElement('button');
+    btn.className='periodo-btn';
+    btn.textContent=p.label;
+    btn.dataset.start=p.start;
+    btn.addEventListener('click',function(){
+      var idx=YYYYMMtoIdx(p.start);
+      slider.value=idx;
+      currentMonth=idx;
+      var yyyymm=monthToYYYYMM(idx);
+      document.getElementById('time-display').textContent=monthToLabel(idx);
+      renderBorders();
+      renderFronts(yyyymm);
+      renderEvents(yyyymm);
+      document.querySelectorAll('.periodo-btn').forEach(function(b){b.classList.remove('active');});
+      btn.classList.add('active');
+      document.getElementById('side-title').textContent=p.label;
+      document.getElementById('side-body').innerHTML='<p style="font-size:0.75rem;color:#bbb;line-height:1.5">'+p.desc+'</p>';
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+function updateActivePeriod(yyyymm){
+  var idx=YYYYMMtoIdx(yyyymm);
+  var active=null;
+  PERIODS.forEach(function(p){
+    var s=YYYYMMtoIdx(p.start),e=YYYYMMtoIdx(p.end);
+    if(idx>=s&&idx<=e) active=p.start;
+  });
+  document.querySelectorAll('.periodo-btn').forEach(function(b){
+    b.classList.toggle('active',b.dataset.start===active);
+  });
+}
+
+// ─── FILTRI TEATRI ────────────────────────────────────────────────────────
+document.querySelectorAll('.teatro-btn').forEach(function(btn){
+  btn.addEventListener('click',function(){
+    document.querySelectorAll('.teatro-btn').forEach(function(b){b.classList.remove('active');});
+    btn.classList.add('active');
+    currentTeatro=btn.dataset.teatro;
+    var yyyymm=monthToYYYYMM(currentMonth);
+    renderFronts(yyyymm);
+    renderEvents(yyyymm);
+  });
+});
+
+// ─── TABS ─────────────────────────────────────────────────────────────────
+var tabContents={
+  'mappa': document.getElementById('tab-mappa'),
+  'armi': document.getElementById('tab-armi'),
+  'shoah': document.getElementById('tab-shoah'),
+  'perdite': document.getElementById('tab-perdite'),
+  'leader': document.getElementById('tab-leader')
+};
+
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click',function(){
+    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('active');});
+    t.classList.add('active');
+    var tab=t.dataset.tab;
+    Object.values(tabContents).forEach(function(c){c.style.display='none';});
+    if(tab==='mappa'){
+      tabContents.mappa.style.display='flex';
+      tabContents.mappa.style.flexDirection='column';
+      setTimeout(function(){map.invalidateSize();},50);
+    } else if(tab==='armi'){
+      tabContents.armi.style.display='block';
+      buildArmi();
+    } else if(tab==='shoah'){
+      tabContents.shoah.style.display='flex';
+      tabContents.shoah.style.flexDirection='column';
+      setTimeout(function(){
+        if(!shoahMap){initShoahMap();}
+        else{shoahMap.invalidateSize();}
+      },50);
+      buildShoahList();
+    } else if(tab==='perdite'){
+      tabContents.perdite.style.display='block';
+      buildPerdite();
+    } else if(tab==='leader'){
+      tabContents.leader.style.display='block';
+      buildLeader();
+    }
+  });
+});
+
+// ─── ARMAMENTI ────────────────────────────────────────────────────────────
+var armiBuilt=false;
+function buildArmi(){
+  if(armiBuilt) return;
+  armiBuilt=true;
+  var container=document.getElementById('tab-armi');
+  container.innerHTML='<div style="padding:12px"><h3 style="color:#e8d5b7;margin-bottom:12px;font-size:0.9rem">Armamenti della Seconda Guerra Mondiale</h3></div>';
+  var grid=document.createElement('div');
+  grid.style.cssText='display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px 12px';
+  WEAPONS.forEach(function(w){
+    var card=document.createElement('div');
+    card.className='arma-card';
+    var badgeClass='badge-'+w.categoria;
+    card.innerHTML='<div class="arma-card-inner">'+
+      '<img class="arma-img" data-wiki="'+w.wiki+'" src="" alt="'+w.nome+'">'+
+      '<div class="arma-info">'+
+      '<h4>'+w.nome+'</h4>'+
+      '<p>'+w.nazione+' · '+w.anni+'</p>'+
+      '<span class="arma-badge '+badgeClass+'">'+w.categoria+'</span>'+
+      '</div></div>';
+    card.addEventListener('click',function(){openArmaModal(w);});
+    grid.appendChild(card);
+    // Lazy load immagine
+    var img=card.querySelector('img');
+    loadWikiImg(img,w.wiki);
+  });
+  container.appendChild(grid);
+}
+
+function loadWikiImg(img,title){
+  fetch('https://en.wikipedia.org/api/rest_v1/page/summary/'+encodeURIComponent(title))
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.thumbnail&&d.thumbnail.source){
+        img.src=d.thumbnail.source;
+      }
+    }).catch(function(){});
+}
+
+function openArmaModal(w){
+  document.getElementById('modal-title').textContent=w.nome;
+  document.getElementById('modal-meta').textContent=w.nazione+' · '+w.anni+' · '+w.categoria;
+  document.getElementById('modal-desc').textContent=w.desc;
+  var img=document.getElementById('modal-img');
+  img.src='';
+  loadWikiImg(img,w.wiki);
+  document.getElementById('modal-arma').classList.add('open');
+}
+document.getElementById('modal-close').addEventListener('click',function(){
+  document.getElementById('modal-arma').classList.remove('open');
+});
+document.getElementById('modal-arma').addEventListener('click',function(e){
+  if(e.target===this) this.classList.remove('open');
+});
+
+// ─── SHOAH ────────────────────────────────────────────────────────────────
+function initShoahMap(){
+  shoahMap=L.map('shoah-map',{center:[51,22],zoom:5,zoomControl:true,attributionControl:false});
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+    {maxZoom:17}).addTo(shoahMap);
+
+  var SHOAH_COLORI={'sterminio':'#111111','lavoro':'#4E342E','transito':'#757575'};
+  var SHOAH_BORDI={'sterminio':'#555','lavoro':'#a07060','transito':'#bbb'};
+
+  function triangoloSVG(col, bordo, size){
+    var h=Math.round(size*0.87);
+    return '<svg width="'+size+'" height="'+h+'" viewBox="0 0 100 87" xmlns="http://www.w3.org/2000/svg">'
+      +'<polygon points="50,87 0,0 100,0" fill="'+col+'" stroke="'+bordo+'" stroke-width="6"/>'
+      +'</svg>';
+  }
+
+  SHOAH.forEach(function(s){
+    var col=SHOAH_COLORI[s.tipo]||'#444';
+    var bordo=SHOAH_BORDI[s.tipo]||'#888';
+    var size=s.vittime?Math.max(18,Math.min(48,18+Math.sqrt(s.vittime/10000)*4)):18;
+    var h=Math.round(size*0.87);
+    var marker=L.marker([s.lat,s.lng],{icon:L.divIcon({
+      html:'<div style="filter:drop-shadow(0 0 4px rgba(0,0,0,.8))">'+triangoloSVG(col,bordo,size)+'</div>',
+      iconSize:[size,h],iconAnchor:[size/2,h],className:''
+    })});
+    var vit=s.vittime?'<div style="color:#ff8a80;font-size:0.72rem;margin-top:5px">Vittime stimate: ~'+s.vittime.toLocaleString()+'</div>':'';
+    marker.bindPopup(
+      '<div style="font-weight:700;color:#f5c6c6;margin-bottom:4px">'+s.nome+'</div>'+
+      '<span style="font-size:0.65rem;background:'+col+';color:#ffd;padding:1px 6px;border-radius:2px">'+s.tipo+'</span>'+
+      (s.apertura?'<div style="font-size:0.67rem;color:#888;margin-top:4px">'+s.apertura+(s.chiusura?' → '+s.chiusura:'')+'</div>':'')+
+      '<div style="font-size:0.72rem;color:#ccc;line-height:1.4;margin-top:5px">'+s.desc.substring(0,200)+'...</div>'+
+      vit,{maxWidth:270}
+    );
+    shoahMap.addLayer(marker);
+  });
+}
+
+function buildShoahList(){
+  var list=document.getElementById('shoah-list');
+  if(list.children.length>0) return;
+  SHOAH.forEach(function(s){
+    var card=document.createElement('div');
+    card.className='shoah-card';
+    var tipoClass='tipo-'+s.tipo;
+    var vit=s.vittime?'Vittime stimate: ~'+s.vittime.toLocaleString():s.apertura||'';
+    card.innerHTML='<span class="shoah-tipo '+tipoClass+'">'+s.tipo+'</span>'+
+      '<h4>'+s.nome+'</h4>'+
+      '<p>'+s.desc.substring(0,120)+'...<br><em style="color:#e07070">'+vit+'</em></p>';
+    card.addEventListener('click',function(){
+      if(shoahMap) shoahMap.setView([s.lat,s.lng],8);
+    });
+    list.appendChild(card);
+  });
+}
+
+// ─── PERDITE ──────────────────────────────────────────────────────────────
+var perditeBuilt=false;
+function buildPerdite(){
+  if(perditeBuilt) return;
+  perditeBuilt=true;
+  var data=[
+    {paese:'URSS',militari:8700000,civili:17000000,col:'#e67e22'},
+    {paese:'Cina',militari:3500000,civili:10000000,col:'#e74c3c'},
+    {paese:'Germania',militari:5300000,civili:3800000,col:'#8B0000'},
+    {paese:'Polonia',militari:240000,civili:5700000,col:'#c0392b'},
+    {paese:'Giappone',militari:2100000,civili:800000,col:'#d4490d'},
+    {paese:'Yugoslavia',militari:446000,civili:1000000,col:'#9b59b6'},
+    {paese:'Francia',militari:217000,civili:350000,col:'#3498db'},
+    {paese:'Gran Bretagna',militari:383000,civili:67000,col:'#2980b9'},
+    {paese:'USA',militari:405000,civili:12000,col:'#27ae60'},
+    {paese:'Italia',militari:319000,civili:153000,col:'#f39c12'},
+  ];
+  var max=Math.max.apply(null,data.map(function(d){return d.militari+d.civili;}));
+  var container=document.getElementById('perdite-chart');
+  container.innerHTML='';
+  data.forEach(function(d){
+    var tot=d.militari+d.civili;
+    var pctMil=Math.round(d.militari/max*100);
+    var pctCiv=Math.round(d.civili/max*100);
+    var pctTot=Math.round(tot/max*100);
+    var totM=(tot/1000000).toFixed(2);
+    container.innerHTML+=
+      '<div class="perdita-bar-wrap">'+
+      '<div class="perdita-label"><span>'+d.paese+'</span><span style="color:#e07070">~'+totM+' mil.</span></div>'+
+      '<div class="perdita-bar-outer">'+
+      '<div class="perdita-bar" style="width:'+pctMil+'%;background:'+d.col+';opacity:0.9">mil.</div>'+
+      '</div>'+
+      '<div class="perdita-bar-outer" style="margin-top:2px">'+
+      '<div class="perdita-bar" style="width:'+pctCiv+'%;background:'+d.col+';opacity:0.5">civ.</div>'+
+      '</div></div>';
+  });
+  container.innerHTML+='<p style="font-size:0.7rem;color:#555;margin-top:16px">Barre superiori = vittime militari · Barre inferiori = vittime civili · Totale mondiale stimato: 70-85 milioni</p>';
+}
+
+// ─── LEADER ───────────────────────────────────────────────────────────────
+var leaderBuilt=false;
+function buildLeader(){
+  if(leaderBuilt) return;
+  leaderBuilt=true;
+  var container=document.getElementById('tab-leader');
+  container.innerHTML='<h3 style="color:#e8d5b7;margin-bottom:12px;font-size:0.9rem">I principali leader della guerra</h3>';
+  LEADERS.forEach(function(l){
+    var card=document.createElement('div');
+    card.className='leader-card';
+    card.innerHTML=
+      '<div class="leader-img-wrap"><img class="leader-img" data-wiki="'+l.wiki+'" src="" alt="'+l.nome+'"></div>'+
+      '<div class="leader-info">'+
+      '<h4>'+l.nome+'</h4>'+
+      '<div class="ruolo">'+l.nazione+' · '+l.anni+'</div>'+
+      '<div style="font-size:0.65rem;color:#666;margin-bottom:4px;font-style:italic">'+l.ruolo+'</div>'+
+      '<p>'+l.desc.substring(0,180)+'...</p>'+
+      '</div>';
+    container.appendChild(card);
+    var img=card.querySelector('img');
+    loadWikiImg(img,l.wiki);
+  });
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded',function(){
+  initMap();
+  Object.values(tabContents).forEach(function(c){c.style.display='none';});
+  tabContents.mappa.style.display='flex';
+  tabContents.mappa.style.flexDirection='column';
+});
+</script>
+</body>
+</html>
