@@ -135,6 +135,7 @@ body {
 .tl-titolo { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; color: var(--fg); margin-bottom: 0.4rem; }
 .tl-desc { font-size: 0.875rem; color: var(--fg2); line-height: 1.55; }
 .tl-photo { margin-top: 0.85rem; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+.tl-chart { margin-top: 0.85rem; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
 .tl-photo img { width: 100%; max-height: 240px; object-fit: cover; display: block; }
 .tl-photo-cap { font-size: 0.72rem; font-style: italic; color: var(--fg3); padding: 0.4rem 0.7rem; background: var(--bg2); }
 
@@ -337,9 +338,6 @@ details[open] summary { color: var(--fg); }
     </div>
     <div class="timeline" id="timeline-container"></div>
 
-    <div class="chart-embed">
-      <iframe title="Crescita del Partito Nazional Socialista dei Lavoratori" aria-label="Linee" id="datawrapper-chart-ULaaF" src="https://datawrapper.dwcdn.net/ULaaF/2/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="400" data-external="1"></iframe>
-    </div>
   </section>
 
   <section id="sec-ideologia" class="section">
@@ -480,6 +478,7 @@ const timelineData = [
     data: "Marzo 1933",
     titolo: "Elezioni: NSDAP al 44%",
     desc: "Alle elezioni di marzo il NSDAP ottiene il 44% dei voti. Il Partito comunista viene dichiarato fuorilegge.",
+    chart: `<iframe title="Crescita del Partito Nazional Socialista dei Lavoratori" aria-label="Linee" id="datawrapper-chart-ULaaF" src="https://datawrapper.dwcdn.net/ULaaF/2/" scrolling="no" frameborder="0" style="width:0;min-width:100%!important;border:none;" height="400" data-external="1"></iframe>`,
     categoria: "regime"
   },
   {
@@ -782,6 +781,7 @@ function buildTimeline() {
       <div class="tl-titolo">${ev.titolo}</div>
       <div class="tl-desc">${ev.desc}</div>
       ${ev.img ? `<div class="tl-photo"><img src="${ev.img}" alt="${ev.imgAlt || ''}"><p class="tl-photo-cap">${ev.imgCap || ''}</p></div>` : ''}
+      ${ev.chart ? `<div class="tl-chart">${ev.chart}</div>` : ''}
     </div>`).join('');
 }
 
