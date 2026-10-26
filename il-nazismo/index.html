@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Il Nazismo in Germania — Dashboard Didattico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Inter:wght@400;500;600&display=swap">
+
+<style>
+:root {
+  --bg:           #F7F3EE;
+  --bg2:          #EDE8E1;
+  --bg3:          #E0D9D0;
+  --fg:           #2A2018;
+  --fg2:          #5C4E3A;
+  --fg3:          #8A7A65;
+  --accent:       #5A1A1A;
+  --accent2:      #3D0E0E;
+  --gold:         #8A6A20;
+  --gold-pale:    #F0E6CC;
+  --border:       #D4C9B8;
+  --card:         #FAF7F2;
+  --shadow:       rgba(42,32,24,0.10);
+  --tag-bg:       #EDE0CC;
+  --tag-fg:       #7A5A20;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-ui:      'Inter', system-ui, sans-serif;
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 15px;
+  line-height: 1.55;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.legg-btn {
+  font-family: var(--font-ui); font-size: 0.65rem; font-weight: 500; letter-spacing: 0.08em;
+  text-transform: uppercase; background: transparent; border: 1px solid rgba(255,255,255,0.25);
+  color: rgba(255,255,255,0.55); padding: 3px 9px; border-radius: 3px; cursor: pointer; transition: all 0.15s;
+}
+.legg-btn:hover, .legg-btn.active { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.45); }
+
+/* HEADER */
+.site-header {
+  background: var(--accent2);
+  border-bottom: 2px solid var(--accent);
+  padding: 1.5rem 1.5rem 1.2rem;
+  position: sticky; top: 0; z-index: 100;
+}
+.header-inner {
+  max-width: 1100px; margin-inline: auto;
+  display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;
+}
+.header-text { flex: 1; min-width: 0; }
+.header-crumb {
+  display: block; font-family: var(--font-ui); font-size: 0.65rem; font-weight: 500;
+  letter-spacing: 0.11em; text-transform: uppercase; color: rgba(255,255,255,0.40);
+  text-decoration: none; margin-bottom: 4px; transition: color 0.15s;
+}
+.header-crumb:hover { color: rgba(255,255,255,0.75); }
+.site-title {
+  font-family: var(--font-display); font-size: clamp(1.5rem, 3.5vw, 2.2rem);
+  font-weight: 700; color: #fff; line-height: 1.1;
+}
+.site-title em { font-style: italic; color: #D4A0A0; }
+.site-dates {
+  font-family: var(--font-ui); font-size: 0.68rem; font-weight: 500;
+  letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-top: 3px;
+}
+.header-controls { display: flex; align-items: center; gap: 0.6rem; flex-shrink: 0; }
+
+.tts-btn {
+  font-family: var(--font-ui); font-size: 0.65rem; font-weight: 500; letter-spacing: 0.06em;
+  background: transparent; border: 1px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.55);
+  padding: 3px 10px; border-radius: 3px; cursor: pointer; transition: all 0.15s;
+  display: none; align-items: center; gap: 5px;
+}
+.tts-btn.visible { display: inline-flex; }
+.tts-btn:hover { background: rgba(255,255,255,0.12); color: rgba(255,255,255,0.85); border-color: rgba(255,255,255,0.45); }
+
+/* NAV TABS */
+.nav-tabs { background: var(--bg2); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
+.nav-tabs::-webkit-scrollbar { display: none; }
+.nav-tabs-inner { max-width: 1100px; margin-inline: auto; display: flex; padding: 0 1.5rem; }
+.tab-btn {
+  font-family: var(--font-ui); font-size: 0.7rem; font-weight: 500; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--fg3); background: none; border: none;
+  border-bottom: 2px solid transparent; padding: 0.75rem 1rem; cursor: pointer;
+  transition: color 0.15s, border-color 0.15s; white-space: nowrap;
+}
+.tab-btn:hover { color: var(--fg2); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* MAIN */
+.main { flex: 1; max-width: 1100px; width: 100%; margin-inline: auto; padding: 2rem 1.5rem 4rem; }
+.section { display: none; }
+.section.active { display: block; }
+
+.sec-title { font-family: var(--font-display); font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 700; color: var(--fg); margin-bottom: 0.3rem; }
+.sec-subtitle { font-family: var(--font-display); font-size: 1rem; font-style: italic; color: var(--fg3); margin-bottom: 1.8rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+
+/* TIMELINE */
+.timeline-filters { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.5rem; }
+.tl-filter {
+  font-family: var(--font-ui); font-size: 0.62rem; font-weight: 500; letter-spacing: 0.07em;
+  text-transform: uppercase; border: 1px solid var(--border); background: var(--card); color: var(--fg3);
+  padding: 3px 10px; border-radius: 20px; cursor: pointer; transition: all 0.15s;
+}
+.tl-filter.active, .tl-filter:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+.timeline { position: relative; padding-left: 1.8rem; }
+.timeline::before { content: ''; position: absolute; left: 6px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+.tl-item {
+  position: relative; margin-bottom: 1.5rem; padding: 1rem 1.1rem 0.9rem;
+  background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+.tl-item:hover { box-shadow: 0 4px 16px var(--shadow); transform: translateX(2px); }
+.tl-item.hidden { display: none; }
+.tl-item::before {
+  content: ''; position: absolute; left: -1.55rem; top: 1.1rem;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--accent); border: 2px solid var(--bg); box-shadow: 0 0 0 2px var(--accent);
+}
+.tl-data { font-family: var(--font-ui); font-size: 0.63rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.25rem; }
+.tl-titolo { font-family: var(--font-display); font-size: 1.1rem; font-weight: 600; color: var(--fg); margin-bottom: 0.4rem; }
+.tl-desc { font-size: 0.875rem; color: var(--fg2); line-height: 1.55; }
+.tl-photo { margin-top: 0.85rem; border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+.tl-photo img { width: 100%; max-height: 240px; object-fit: cover; display: block; }
+.tl-photo-cap { font-size: 0.72rem; font-style: italic; color: var(--fg3); padding: 0.4rem 0.7rem; background: var(--bg2); }
+
+.cat-badge { display: inline-block; font-size: 0.58rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 7px; border-radius: 20px; margin-bottom: 0.4rem; }
+.cat-origini       { background: #EDE0CC; color: #7A5A20; }
+.cat-ideologia     { background: #E8D0D0; color: #7A2020; }
+.cat-ascesa        { background: #D0E0D0; color: #205A20; }
+.cat-regime        { background: #D0D0E8; color: #20207A; }
+.cat-antisemitismo { background: #F0D0D0; color: #8B0000; }
+.cat-economia      { background: #D8E8D0; color: #2A5A20; }
+
+/* IDEOLOGIA */
+.ideologia-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+.idea-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.3rem 1.4rem 1.2rem; transition: box-shadow 0.15s, transform 0.15s; }
+.idea-card:hover { box-shadow: 0 4px 16px var(--shadow); transform: translateY(-2px); }
+.idea-titolo { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: var(--fg); margin-bottom: 0.2rem; }
+.idea-sub { font-family: var(--font-display); font-size: 0.9rem; font-style: italic; color: var(--accent); margin-bottom: 0.7rem; }
+.idea-corpo { font-size: 0.875rem; color: var(--fg2); line-height: 1.6; margin-bottom: 0.8rem; }
+.idea-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.idea-tag { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; background: var(--tag-bg); color: var(--tag-fg); padding: 2px 7px; border-radius: 20px; }
+
+/* PERSONAGGI */
+.personaggi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+.pers-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: box-shadow 0.15s, transform 0.15s; }
+.pers-card:hover { box-shadow: 0 4px 16px var(--shadow); transform: translateY(-2px); }
+.pers-photo { width: 100%; height: 200px; object-fit: cover; object-position: center top; display: block; border-bottom: 1px solid var(--border); filter: grayscale(30%); }
+.pers-body { padding: 1rem 1.2rem 1.1rem; }
+.pers-nome { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; color: var(--fg); margin-bottom: 0.1rem; }
+.pers-date { font-size: 0.7rem; color: var(--fg3); letter-spacing: 0.04em; margin-bottom: 0.15rem; }
+.pers-ruolo { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.7rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border); }
+.pers-nsdap        { color: var(--accent); }
+.pers-establishment{ color: var(--fg3); }
+.pers-opposizione  { color: #2D6A4F; }
+.pers-bio { font-size: 0.865rem; color: var(--fg2); line-height: 1.55; }
+
+/* DOCUMENTI */
+.documenti-list { display: flex; flex-direction: column; gap: 1.2rem; }
+.doc-card { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 1.2rem 1.4rem 1.1rem; transition: box-shadow 0.15s, transform 0.15s; }
+.doc-card:hover { box-shadow: 0 4px 16px var(--shadow); transform: translateY(-2px); }
+.doc-meta { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin-bottom: 0.5rem; }
+.doc-data { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.doc-autore { font-size: 0.7rem; color: var(--fg3); font-style: italic; }
+.doc-titolo { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; color: var(--fg); margin-bottom: 0.7rem; }
+.doc-testo { font-family: var(--font-display); font-size: 1rem; font-style: italic; color: var(--fg2); line-height: 1.7; border-left: 2px solid var(--gold-pale); padding-left: 1rem; margin-bottom: 0.8rem; }
+.doc-commento { font-size: 0.865rem; color: var(--fg2); line-height: 1.6; }
+details summary { cursor: pointer; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg3); user-select: none; margin-bottom: 0.6rem; transition: color 0.15s; }
+details summary:hover { color: var(--fg2); }
+details[open] summary { color: var(--fg); }
+
+/* ANTISEMITISMO */
+.antisem-list { display: flex; flex-direction: column; gap: 1.5rem; }
+.antisem-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.3rem 1.5rem 1.2rem; transition: box-shadow 0.15s, transform 0.15s; }
+.antisem-card:hover { box-shadow: 0 4px 16px var(--shadow); transform: translateY(-2px); }
+.antisem-header { display: flex; align-items: baseline; flex-wrap: wrap; gap: 0.8rem; margin-bottom: 0.6rem; }
+.antisem-data { font-size: 0.63rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.antisem-fase { font-size: 0.6rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; background: #F0D0D0; color: #8B0000; }
+.antisem-titolo { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; color: var(--fg); margin-bottom: 0.6rem; }
+.antisem-desc { font-size: 0.875rem; color: var(--fg2); line-height: 1.6; margin-bottom: 0.9rem; }
+.antisem-cons-title { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg3); margin-bottom: 0.4rem; }
+.antisem-cons { list-style: none; display: flex; flex-direction: column; gap: 0.25rem; }
+.antisem-cons li { font-size: 0.845rem; color: var(--fg2); padding-left: 1rem; position: relative; }
+.antisem-cons li::before { content: '›'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+
+/* PROPAGANDA */
+.prop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+.prop-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.2rem 1.3rem 1.1rem; transition: box-shadow 0.15s, transform 0.15s; }
+.prop-card:hover { box-shadow: 0 4px 16px var(--shadow); transform: translateY(-2px); }
+.prop-titolo { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; color: var(--fg); margin-bottom: 0.15rem; }
+.prop-resp { font-size: 0.68rem; color: var(--fg3); font-style: italic; margin-bottom: 0.7rem; padding-bottom: 0.6rem; border-bottom: 1px solid var(--border); }
+.prop-desc { font-size: 0.865rem; color: var(--fg2); line-height: 1.6; margin-bottom: 0.8rem; }
+.prop-strumenti-title { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--fg3); margin-bottom: 0.35rem; }
+.prop-strumenti { list-style: none; display: flex; flex-direction: column; gap: 0.2rem; }
+.prop-strumenti li { font-size: 0.82rem; color: var(--fg2); padding-left: 0.9rem; position: relative; }
+.prop-strumenti li::before { content: '·'; position: absolute; left: 0; color: var(--accent); font-weight: 700; }
+
+/* ECONOMIA */
+.eco-list { display: flex; flex-direction: column; gap: 1.2rem; }
+.eco-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 1.3rem 1.5rem 1.2rem; transition: box-shadow 0.15s, transform 0.15s; }
+.eco-card:hover { box-shadow: 0 4px 16px var(--shadow); transform: translateY(-2px); }
+.eco-periodo { font-size: 0.63rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg3); display: block; margin-bottom: 0.3rem; }
+.eco-titolo { font-family: var(--font-display); font-size: 1.15rem; font-weight: 700; color: var(--fg); margin-bottom: 0.6rem; }
+.eco-desc { font-size: 0.875rem; color: var(--fg2); line-height: 1.6; margin-bottom: 0.8rem; }
+.eco-citazione { font-family: var(--font-display); font-size: 0.95rem; font-style: italic; color: var(--fg2); line-height: 1.7; border-left: 2px solid var(--gold-pale); padding-left: 1rem; margin-bottom: 0.8rem; }
+.eco-dati { display: flex; flex-direction: column; gap: 0.25rem; }
+.eco-dato { font-size: 0.83rem; color: var(--fg2); padding-left: 1rem; position: relative; }
+.eco-dato::before { content: '›'; position: absolute; left: 0; color: var(--gold); font-weight: 700; }
+
+/* HEADER LOGO */
+.header-logo {
+  width: 64px; height: 64px; object-fit: contain; flex-shrink: 0;
+  border-radius: 50%; opacity: 0.85;
+}
+
+/* FOTO CON DIDASCALIA */
+.photo-block {
+  margin: 1.8rem 0; border-radius: 8px; overflow: hidden;
+  border: 1px solid var(--border); background: var(--card);
+}
+.photo-block img {
+  width: 100%; display: block; max-height: 420px; object-fit: cover;
+}
+.photo-caption {
+  font-size: 0.78rem; color: var(--fg3); line-height: 1.5;
+  padding: 0.65rem 1rem; border-top: 1px solid var(--border);
+  font-style: italic;
+}
+.photo-caption a { color: var(--fg3); text-underline-offset: 2px; }
+
+/* CHART EMBED (Datawrapper) */
+.chart-embed {
+  margin: 1.8rem 0;
+  border-radius: 8px; overflow: hidden;
+  border: 1px solid var(--border);
+}
+.chart-embed iframe {
+  display: block; width: 100%; min-width: 100% !important;
+  border: none;
+}
+
+/* FOCUS BOX */
+.focus-box {
+  margin: 2rem 0; background: var(--gold-pale);
+  border: 1px solid #D4B870; border-left: 4px solid var(--gold);
+  border-radius: 0 8px 8px 0; padding: 1.4rem 1.5rem;
+}
+.focus-header {
+  display: flex; align-items: center; gap: 1rem; margin-bottom: 0.9rem;
+}
+.focus-img {
+  width: 72px; height: 72px; object-fit: contain; flex-shrink: 0;
+}
+.focus-label {
+  font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--gold); display: block; margin-bottom: 0.25rem;
+}
+.focus-titolo {
+  font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; color: var(--fg);
+}
+.focus-corpo { font-size: 0.875rem; color: var(--fg2); line-height: 1.65; margin-bottom: 0.9rem; }
+.focus-citazione {
+  font-family: var(--font-display); font-size: 0.95rem; font-style: italic;
+  color: var(--fg2); line-height: 1.7;
+  border-left: 2px solid var(--gold); padding-left: 1rem;
+}
+
+@media (max-width: 600px) {
+  .header-inner { flex-direction: column; align-items: flex-start; gap: 0.7rem; }
+  .main { padding: 1.5rem 1rem 3rem; }
+  .ideologia-grid, .personaggi-grid, .prop-grid { grid-template-columns: 1fr; }
+  .header-logo { width: 48px; height: 48px; }
+}
+</style>
+
+<!-- Datawrapper responsive resize -->
+<script>(function(){window.addEventListener("message",function(e){if(e.data["datawrapper-height"]!==void 0){var t=document.querySelectorAll("iframe");for(var n in e.data["datawrapper-height"])for(var r=0,i;i=t[r];r++)if(i.contentWindow===e.source){var a=e.data["datawrapper-height"][n]+"px";i.style.height=a}}})})();</script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <img src="./assets/img/logo-nsdap.png" alt="Emblema del NSDAP" class="header-logo">
+    <div class="header-text">
+      <a href="../" class="header-crumb">← Storia Contemporanea</a>
+      <h1 class="site-title">Il <em>Nazismo</em> in Germania</h1>
+      <p class="site-dates">1919 – 1945 · Origini, regime, antisemitismo</p>
+    </div>
+    <div class="header-controls">
+      <button class="tts-btn" id="tts-play" onclick="ttsPlay()">▶ Leggi</button>
+      <button class="tts-btn" id="tts-stop" onclick="ttsStop()">⏹ Stop</button>
+      <button class="legg-btn" id="legg-btn" onclick="toggleLegg()" title="Alta leggibilità">Aa</button>
+    </div>
+  </div>
+</header>
+
+<nav class="nav-tabs">
+  <div class="nav-tabs-inner">
+    <button class="tab-btn active" onclick="showTab('timeline', this)">Cronologia</button>
+    <button class="tab-btn" onclick="showTab('ideologia', this)">Ideologia</button>
+    <button class="tab-btn" onclick="showTab('personaggi', this)">Personaggi</button>
+    <button class="tab-btn" onclick="showTab('documenti', this)">Documenti</button>
+    <button class="tab-btn" onclick="showTab('antisemitismo', this)">Antisemitismo</button>
+    <button class="tab-btn" onclick="showTab('propaganda', this)">Propaganda</button>
+    <button class="tab-btn" onclick="showTab('economia', this)">Economia</button>
+  </div>
+</nav>
+
+<main class="main">
+
+  <section id="sec-timeline" class="section active">
+    <h2 class="sec-title">Cronologia</h2>
+    <p class="sec-subtitle">Dall'origine del NSDAP alla Kristallnacht, 1889–1938</p>
+    <div class="timeline-filters" id="tl-filters">
+      <button class="tl-filter active" onclick="filterTimeline('all', this)">Tutti</button>
+      <button class="tl-filter" onclick="filterTimeline('origini', this)">Origini</button>
+      <button class="tl-filter" onclick="filterTimeline('ideologia', this)">Ideologia</button>
+      <button class="tl-filter" onclick="filterTimeline('ascesa', this)">Ascesa</button>
+      <button class="tl-filter" onclick="filterTimeline('regime', this)">Regime</button>
+      <button class="tl-filter" onclick="filterTimeline('antisemitismo', this)">Antisemitismo</button>
+      <button class="tl-filter" onclick="filterTimeline('economia', this)">Economia</button>
+    </div>
+    <div class="timeline" id="timeline-container"></div>
+
+    <div class="chart-embed">
+      <iframe title="Crescita del Partito Nazional Socialista dei Lavoratori" aria-label="Linee" id="datawrapper-chart-ULaaF" src="https://datawrapper.dwcdn.net/ULaaF/2/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="400" data-external="1"></iframe>
+    </div>
+  </section>
+
+  <section id="sec-ideologia" class="section">
+    <h2 class="sec-title">Ideologia</h2>
+    <p class="sec-subtitle">Le componenti del nazionalsocialismo</p>
+    <div class="ideologia-grid" id="ideologia-container"></div>
+
+    <div class="focus-box">
+      <div class="focus-header">
+        <img src="./assets/img/svastica-induista.png" alt="Svastica induista" class="focus-img">
+        <div>
+          <span class="focus-label">Focus</span>
+          <span class="focus-titolo">La svastica: dall'Asia al nazismo</span>
+        </div>
+      </div>
+      <p class="focus-corpo">Il simbolo della svastica è oggi indissolubilmente associato al nazismo ed è utilizzato tuttora da associazioni illegali di stampo neonazista o neofascista. In moltissimi Stati la sua esibizione è considerata un reato, ricadendo nelle fattispecie di apologia del nazifascismo o di incitamento all'odio. Tuttavia, dal punto di vista storico, la svastica non ha alcun significato antisemita originariamente: è un simbolo antichissimo e augurale, diffuso in praticamente tutta l'Asia, dall'India al Giappone. Hitler conosceva questo simbolo, avendolo incontrato durante i suoi anni di studio delle culture orientali, e lo adottò per il partito nella configurazione di una svastica nera in un cerchio bianco su fondo rosso.</p>
+      <blockquote class="focus-citazione">«Nel rosso riconosciamo l'idea sociale del movimento, nel bianco l'idea nazionalista, nella croce uncinata l'impegno a combattere per l'affermazione dell'uomo ariano e per il diffondersi della tendenza al lavoro creativo, che fu e sarà sempre antisemitico.»<br><small style="font-size:0.78rem; color:var(--fg3); font-style:normal;">— Adolf Hitler, <em>Mein Kampf</em></small></blockquote>
+    </div>
+  </section>
+
+  <section id="sec-personaggi" class="section">
+    <h2 class="sec-title">Personaggi</h2>
+    <p class="sec-subtitle">Protagonisti del nazismo e della resistenza</p>
+    <div class="personaggi-grid" id="personaggi-container"></div>
+  </section>
+
+  <section id="sec-documenti" class="section">
+    <h2 class="sec-title">Documenti</h2>
+    <p class="sec-subtitle">Fonti primarie con commento storico</p>
+    <div class="documenti-list" id="documenti-container"></div>
+  </section>
+
+  <section id="sec-antisemitismo" class="section">
+    <h2 class="sec-title">Antisemitismo</h2>
+    <p class="sec-subtitle">Dalla discriminazione alla violenza di massa, 1933–1938</p>
+    <div class="antisem-list" id="antisem-container"></div>
+
+    <div class="chart-embed">
+      <iframe title="I principali lager nazisti" aria-label="Mappa simbolica" id="datawrapper-chart-VNouR" src="//datawrapper.dwcdn.net/VNouR/2/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="615" data-external="1"></iframe>
+    </div>
+
+    <div class="photo-block">
+      <img src="./assets/img/stella-ghetto-lodz.png" alt="Stella di David e ebrei nel ghetto di Lodz">
+      <p class="photo-caption">A sinistra, la stella di David di stoffa che gli ebrei erano obbligati a cucire sugli abiti per identificarsi. A destra, ebrei nel ghetto di Łódź in Polonia che indossano la stella. Fonte: JTA / Jewish Chronicle / Heritage Images / Getty Images</p>
+    </div>
+  </section>
+
+  <section id="sec-propaganda" class="section">
+    <h2 class="sec-title">Propaganda</h2>
+    <p class="sec-subtitle">La macchina del consenso nazista</p>
+    <div class="prop-grid" id="prop-container"></div>
+  </section>
+
+  <section id="sec-economia" class="section">
+    <h2 class="sec-title">Economia</h2>
+    <p class="sec-subtitle">Dal crollo del '29 all'economia di guerra</p>
+    <div class="eco-list" id="eco-container"></div>
+
+    <div class="chart-embed">
+      <iframe title="Spese militari della Germania Nazista rispetto al PIL" aria-label="Colonne raggruppate" id="datawrapper-chart-fS6T6" src="https://datawrapper.dwcdn.net/fS6T6/2/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="890" data-external="1"></iframe>
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* ═══ DATA — testi dall'articolo di V. F. Brugnola ═══ */
+
+const timelineData = [
+  {
+    anno: 1889,
+    data: "1889",
+    titolo: "Nascita di Adolf Hitler",
+    desc: "Figlio del doganiere austriaco Alois Hitler e di Klara Pözl, Hitler nasce nel 1889. Viene educato come cattolico ed ha sempre un rapporto burrascoso con il padre, violento e fedifrago. Il futuro dittatore fu compagno di scuola del coetaneo Ludwig Wittgenstein. La madre muore di cancro al seno e Hitler ne rimane profondamente segnato.",
+    categoria: "origini"
+  },
+  {
+    anno: 1907,
+    data: "1907–1913",
+    titolo: "Vienna: rifiuto e radicalizzazione",
+    desc: "Hitler coltiva ambizioni artistiche ma viene rifiutato dall'Accademia delle Belle Arti di Vienna, anche per la mancanza del titolo di studio. Si sposta da alcuni parenti a Liverpool, poi ritorna a Vienna, dove entra in contatto con l'antisemitismo. Fugge dall'Austria per sfuggire alla leva, ma decide di arruolarsi nell'esercito tedesco durante la Prima Guerra Mondiale.",
+    categoria: "origini"
+  },
+  {
+    anno: 1920,
+    data: "1920–1921",
+    titolo: "Programma del NSDAP in 25 punti",
+    desc: "Prima del putsch di Monaco, Hitler dà un programma al partito, cambiando il nome da DAP a NSDAP. Il programma consta di venticinque punti: perseguimento del grande pangermanesimo, abolizione dei trattati di pace, togliere la cittadinanza agli ebrei, abolizione dei redditi che non derivano dal lavoro, repressione di quelle espressioni culturali considerate come disgregatrici del popolo tedesco.",
+    categoria: "origini"
+  },
+  {
+    anno: 1923,
+    data: "8–9 novembre 1923",
+    titolo: "Putsch di Monaco",
+    desc: "Hitler tenta un colpo di stato a Monaco. Il tentativo fallisce, viene arrestato e condannato. In carcere scrive il Mein Kampf.",
+    categoria: "origini"
+  },
+  {
+    anno: 1925,
+    data: "1925–1926",
+    titolo: "Pubblicazione del Mein Kampf",
+    desc: "Viene pubblicato il Mein Kampf. Hitler vi espone la sua visione razzista e l'antisemitismo biologico. La svastica viene spiegata nelle sue componenti simboliche: nel rosso l'idea sociale del movimento, nel bianco l'idea nazionalista, nella croce uncinata l'impegno a combattere per l'affermazione dell'uomo ariano.",
+    categoria: "ideologia"
+  },
+  {
+    anno: 1929,
+    data: "Ottobre 1929",
+    titolo: "La crisi del '29 colpisce la Germania",
+    desc: "L'economia tedesca, dopo una timida ripresa dal 1925-1926 grazie ai finanziamenti del Piano Dawes, crolla nuovamente per effetto della crisi del 1929, che si riversa sulla Germania in maniera pesantissima. In questo clima il NSDAP cresce significativamente.",
+    categoria: "ascesa"
+  },
+  {
+    anno: 1930,
+    data: "1930–1932",
+    titolo: "Crescita del NSDAP",
+    desc: "Rispetto ad altri partiti statici o in declino (SPD, KPD, DPZ), il NSDAP cresce in maniera molto significativa negli anni a cavallo del 1930. Circa due terzi dei membri del partito hanno un'età inferiore ai 40 anni. La base elettorale è composta, in analogia con il fascismo, dalla piccola borghesia impiegatizia.",
+    categoria: "ascesa"
+  },
+  {
+    anno: 1933,
+    data: "30 gennaio 1933",
+    titolo: "Hitler cancelliere",
+    desc: "Tra l'ottobre 1931 e il novembre 1932 la Germania vive una serie di crisi di governo. Von Hindenburg conferisce a Hitler l'incarico di formare un governo il 30 gennaio 1933. Il governo non è monocolore: su 11 ministri solo 3 sono nazisti.",
+    categoria: "regime"
+  },
+  {
+    anno: 1933,
+    data: "27 febbraio 1933",
+    titolo: "Incendio del Reichstag",
+    desc: "Appena un mese dopo aver ottenuto l'incarico di governo, scoppia un incendio al Reichstag. Il dolo viene addossato a un militante comunista. Hitler usa l'evento come pretesto per perseguitare ulteriormente gli oppositori politici.",
+    img: "./assets/img/incendio-reichstag.png",
+    imgAlt: "Incendio del Reichstag, 27 febbraio 1933",
+    imgCap: "Il Reichstag in fiamme, 27 febbraio 1933.",
+    categoria: "regime"
+  },
+  {
+    anno: 1933,
+    data: "Marzo 1933",
+    titolo: "Elezioni: NSDAP al 44%",
+    desc: "Alle elezioni di marzo il NSDAP ottiene il 44% dei voti. Il Partito comunista viene dichiarato fuorilegge.",
+    categoria: "regime"
+  },
+  {
+    anno: 1933,
+    data: "24 marzo 1933",
+    titolo: "Legge dei pieni poteri — fine di Weimar",
+    desc: "Il Parlamento approva il conferimento dei pieni poteri a Hitler. Finisce così ufficialmente la Repubblica di Weimar, nasce il Terzo Reich.",
+    categoria: "regime"
+  },
+  {
+    anno: 1933,
+    data: "1° aprile 1933",
+    titolo: "Boicottaggio delle attività ebraiche",
+    desc: "Membri delle SA e delle SS, alle 10 in punto del mattino, si appostano davanti ai negozi e alle attività degli ebrei per informare gli avventori che quei negozi sono di cittadini ebrei. In diverse parti della Germania si registrano episodi di violenza. A Kiel un avvocato ebreo viene ucciso.",
+    categoria: "antisemitismo"
+  },
+  {
+    anno: 1933,
+    data: "20 luglio 1933",
+    titolo: "Concordato con la Chiesa cattolica",
+    desc: "Così come il regime fascista con i Patti Lateranensi, anche il regime nazista stringe un Concordato con la Chiesa cattolica di Pio XI. Non vi è alcuna manifestazione concreta di opposizione della Chiesa contro il regime, se non nel 1937 con l'enciclica «Con cocente dolore» (Mit brennender Sorge).",
+    categoria: "regime"
+  },
+  {
+    anno: 1934,
+    data: "30 giugno 1934",
+    titolo: "Notte dei lunghi coltelli",
+    desc: "Le SS trucidano Röhm e una settantina delle sue truppe durante un raduno delle SA. Si trattava di riprendere il controllo delle SA, che incarnavano gli aspetti più rivoluzionari del nazionalsocialismo e la cui scarsa inclinazione verso il rispetto delle gerarchie preoccupava Hitler e la Wehrmacht.",
+    categoria: "regime"
+  },
+  {
+    anno: 1934,
+    data: "Agosto 1934",
+    titolo: "Hitler Führer",
+    desc: "Dopo pochi mesi, alla morte di Hindenburg, Hitler diventa presidente, assumendo così anche il comando supremo delle forze armate. Il comando delle forze dell'ordine passa da Göring a Himmler, che nel 1935 riorganizza la Gestapo, perfettamente integrata con le SS.",
+    categoria: "regime"
+  },
+  {
+    anno: 1935,
+    data: "15 settembre 1935",
+    titolo: "Leggi di Norimberga",
+    desc: "Il Parlamento tedesco, riunito a Norimberga, approva le prime leggi antisemite all'unanimità. Si vietano i matrimoni misti e si sciolgono quelli già esistenti; si vietano i rapporti sessuali tra ebrei e tedeschi. Le leggi forniscono anche la definizione nazista di ebreo: chiunque abbia almeno tre nonni ebrei o pratichi l'ebraismo.",
+    categoria: "antisemitismo"
+  },
+  {
+    anno: 1936,
+    data: "1936",
+    titolo: "Piano economico quadriennale",
+    desc: "Quando si vara il piano economico quadriennale, la maggior parte della manodopera disponibile viene indirizzata verso l'industria pesante e bellica: costruzione di armamenti per esercito, marina ed aviazione.",
+    categoria: "economia"
+  },
+  {
+    anno: 1938,
+    data: "9–10 novembre 1938",
+    titolo: "Notte dei cristalli (Kristallnacht)",
+    desc: "Un giovane ebreo uccide a Parigi il diplomatico Ernst von Rath. La reazione dei tedeschi è durissima. In tutta la Germania si dà vita a veri e propri pogrom. Migliaia di ebrei vengono assassinati, arrestati, picchiati. Si incendiano le sinagoghe, si distruggono le vetrine delle attività commerciali ebree — da qui il nome Kristallnacht. Ai vigili del fuoco era stato intimato di non rispondere alle richieste di soccorso provenienti da ebrei.",
+    img: "./assets/img/kristallnacht.png",
+    imgAlt: "Vetrine distrutte durante la Kristallnacht",
+    imgCap: "Le vetrine delle attività ebraiche distrutte durante la Kristallnacht. Fonte: Holocaust Encyclopedia",
+    categoria: "antisemitismo"
+  }
+];
+
+const ideologiaData = [
+  {
+    titolo: "Nazionalismo bellicista",
+    sottotitolo: "La rivincita di Versailles",
+    corpo: "Il nazionalismo nazista trovò appoggio in tutte quelle fasce di popolazione rimaste deluse — ed anzi disonorevoli — delle condizioni imposte dal Trattato di Versailles, alla fine della Grande Guerra. Molti cittadini tedeschi credevano che la Germania non fosse stata davvero sconfitta nella Prima Guerra Mondiale e reputavano eccessivamente pesanti le sofferenze derivate dalla politica iperinflattiva degli anni Venti. Si trattava dunque di restituire alla Germania l'onore e il prestigio consoni ad una grande potenza europea, sottratti dalle clausole del Trattato di Versailles.",
+    tag: ["Versailles", "Pangermanesimo", "Dolchstoßlegende"]
+  },
+  {
+    titolo: "Antisemitismo biologico",
+    sottotitolo: "Il nemico razziale",
+    corpo: "Non si può separare il nazismo dall'antisemitismo. Si può anzi affermare che l'antisemitismo sia una delle componenti costitutive del nazismo. Gli ebrei vengono concepiti come un gruppo sociale parassitario, che porta alla morte il popolo che lo ospita. L'ebreo era accusato di essere una delle cause, se non la principale, del periodo nefasto che la Germania attraversava dalla fine della Grande Guerra.",
+    tag: ["Mein Kampf", "Razza", "Soluzione finale"]
+  },
+  {
+    titolo: "Soppressione dell'opposizione",
+    sottotitolo: "Terrore come strumento politico",
+    corpo: "I nazisti si scagliano soprattutto nelle aggressioni contro socialdemocratici e comunisti. Proprio come era accaduto per il fascismo, lo Stato tedesco si macchia della grave colpa di tollerare tali nefandezze. La conseguenza di questa tolleranza non fa che aumentare la credibilità politica del NSDAP, che spaventa e annulla quasi tutta l'opposizione.",
+    tag: ["SA", "SS", "Gestapo"]
+  },
+  {
+    titolo: "La base del partito",
+    sottotitolo: "Chi aderisce al NSDAP",
+    corpo: "Circa due terzi dei membri del partito hanno un'età inferiore ai 40 anni. Quelli che diventeranno i maggiori gerarchi della Germania nazista — Göbbels, Himmler, Speer, Hess — hanno, nel 1933, poco meno o poco più di 30 anni. La base elettorale è composta — in analogia con il fascismo — dalla piccola borghesia impiegatizia.",
+    tag: ["Giovani", "Piccola borghesia", "Gerarchi"]
+  },
+  {
+    titolo: "Persecuzione degli indesiderati",
+    sottotitolo: "Il disegno eugenetico nazista",
+    corpo: "I nazisti consideravano gli ebrei come il nemico esterno, volto a peggiorare la fantomatica razza ariana. La conservazione di questa passava anche per l'eliminazione delle debolezze: sterilizzare e/o eliminare tutti coloro i quali erano affetti da malattie non curabili o tare ereditarie, o coloro che non rientravano nei folli criteri di «purezza» del regime. Rientravano in queste categorie i malati di mente, i rom, gli omosessuali.",
+    tag: ["Eugenetica", "Razza ariana", "Rom · Omosessuali"]
+  }
+];
+
+const personaggiData = [
+  {
+    nome: "Adolf Hitler",
+    date: "1889–1945",
+    ruolo: "Führer und Reichskanzler",
+    fazione: "nsdap",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Adolf_Hitler.jpg/440px-Adolf_Hitler.jpg",
+    bio: "Figlio del doganiere austriaco Alois Hitler, nasce nel 1889. Rifiutato dall'Accademia delle Belle Arti di Vienna, si avvicina all'antisemitismo nella capitale austriaca. Si arruola nell'esercito tedesco nella Prima Guerra Mondiale, si distingue e viene insignito di varie medaglie. Dopo la guerra si avvicina al DAP, tenta il putsch di Monaco (1923), in carcere scrive il Mein Kampf. Diventa cancelliere il 30 gennaio 1933, Führer alla morte di Hindenburg (1934)."
+  },
+  {
+    nome: "Joseph Goebbels",
+    date: "1897–1945",
+    ruolo: "Ministro della Propaganda e dell'Informazione",
+    fazione: "nsdap",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Bundesarchiv_Bild_146-1968-101-20A%2C_Joseph_Goebbels.jpg/440px-Bundesarchiv_Bild_146-1968-101-20A%2C_Joseph_Goebbels.jpg",
+    bio: "Al gerarca nazista Goebbels viene affidato l'importantissimo Ministero della Propaganda e dell'Informazione, ruolo che conserva per tutta la durata del regime. Questo ministero utilizza in maniera massiva marce, manifestazioni, parate e raduni, abilmente organizzati e dalla regia impeccabile. Goebbels ridefinisce la cultura della Germania nazista attraverso i roghi di libri e il controllo del cinema e della radio."
+  },
+  {
+    nome: "Heinrich Himmler",
+    date: "1900–1945",
+    ruolo: "Capo delle SS e della Gestapo",
+    fazione: "nsdap",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Heinrich_Himmler.jpg/440px-Heinrich_Himmler.jpg",
+    bio: "Dopo la notte dei lunghi coltelli, il comando delle forze dell'ordine passa a Himmler. Questi, oltre ad essere il capo delle SS, nel 1935 riorganizza la Gestapo, una polizia segreta perfettamente integrata con le SS stesse. Costruisce l'apparato repressivo che sarà centrale nell'organizzazione dello sterminio degli ebrei."
+  },
+  {
+    nome: "Hermann Göring",
+    date: "1893–1946",
+    ruolo: "Presidente del Reichstag, Ministro dell'Aviazione",
+    fazione: "nsdap",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Bundesarchiv_Bild_102-13805%2C_Hermann_G%C3%B6ring.jpg/440px-Bundesarchiv_Bild_102-13805%2C_Hermann_G%C3%B6ring.jpg",
+    bio: "Inizialmente la polizia era affidata al comando di Göring, che utilizza agli inizi gli uomini delle SA come polizia. Dopo la notte dei lunghi coltelli perde il controllo delle forze dell'ordine, che passa a Himmler. Rimane tuttavia una figura centrale del regime, comandando la Luftwaffe e coordinando il piano economico quadriennale."
+  },
+  {
+    nome: "Ernst Röhm",
+    date: "1887–1934",
+    ruolo: "Capo delle SA",
+    fazione: "nsdap",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Ernst_R%C3%B6hm_1933.jpg/440px-Ernst_R%C3%B6hm_1933.jpg",
+    bio: "Le SA guidate da Röhm incarnavano gli aspetti più rivoluzionari del nazionalsocialismo. La scarsa inclinazione verso il rispetto delle gerarchie da parte delle SA preoccupava non poco Hitler e i gerarchi della Wehrmacht. Röhm viene trucidato dalle SS durante la notte dei lunghi coltelli (30 giugno 1934) insieme a una settantina delle sue truppe."
+  },
+  {
+    nome: "Paul von Hindenburg",
+    date: "1847–1934",
+    ruolo: "Presidente della Repubblica di Weimar",
+    fazione: "establishment",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e6/Paul_von_Hindenburg.jpg/440px-Paul_von_Hindenburg.jpg",
+    bio: "Presidente della Repubblica tedesca, conferisce a Hitler l'incarico di formare il governo il 30 gennaio 1933. Il governo non è monocolore: su 11 ministri solo 3 sono nazisti. Alla morte di Hindenburg, Hitler diventa presidente, assumendo così anche il comando supremo delle forze armate. La sua morte segna il completamento della presa del potere assoluto."
+  },
+  {
+    nome: "Dietrich Bonhoeffer",
+    date: "1906–1945",
+    ruolo: "Teologo protestante, resistente",
+    fazione: "opposizione",
+    img: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/50/Bonhoeffer_portrait.jpg/440px-Bonhoeffer_portrait.jpg",
+    bio: "La Chiesa protestante si piegò a Hitler, e i pochi dissidenti furono deportati nei campi di concentramento. Bonhoeffer fu tra i rari pastori luterani a opporsi apertamente al nazismo. Partecipa alla rete di resistenza, viene arrestato nel 1943 e impiccato nel campo di Flossenbürg il 9 aprile 1945, poche settimane prima della liberazione."
+  }
+];
+
+const documentiData = [
+  {
+    titolo: "Il programma del NSDAP in 25 punti",
+    data: "1920–1921",
+    autore: "NSDAP (Hitler e Drexler)",
+    testo: "1. Perseguimento del grande pangermanesimo, con annessione dell'Austria e dei tedeschi dei Sudeti. 2. Abolizione dei trattati di pace. 3. Togliere la cittadinanza agli ebrei. 4. Abolizione dei redditi che non derivano dal lavoro. 5. La repressione e chiusura di quelle espressioni culturali considerate come disgregatrici del popolo tedesco.",
+    commento: "Il programma consta di venticinque punti, di cui qui si indicano i principali. È deliberatamente semplice e propagandistico. Diversamente dal fascismo delle origini, il nazismo ha fin dall'inizio un nucleo ideologico preciso incentrato sulla razza e sull'esclusione degli ebrei dalla cittadinanza."
+  },
+  {
+    titolo: "Mein Kampf — L'antisemitismo biologico",
+    data: "1925–1926",
+    autore: "Adolf Hitler",
+    testo: "«[…] il giovane ebreo dai capelli neri aspetta di nascosto l'inconsapevole ragazza, che egli contamina con il suo sangue, sottraendola così al suo popolo. Con ogni mezzo cerca di distruggere le basi razziali del popolo che si è proposto di soggiogare. […] Il suo pensiero segreto e il suo chiaro fine [è quello] di rovinare l'odiata razza bianca [ariana], con l'imbastardimento che consegue [a rapporti sessuali con razze inferiori], abbattendola dalla sua posizione di dominio politico e culturale, per imporsi come [nuova razza] padrona.»",
+    commento: "Gli ebrei vengono concepiti come un gruppo sociale parassitario, che porta alla morte il popolo che lo ospita. L'ebreo era accusato di essere una delle cause, se non la principale, del periodo nefasto che la Germania attraversava dalla fine della Grande Guerra. Non si può separare il nazismo dall'antisemitismo: si può anzi affermare che l'antisemitismo sia una delle componenti costitutive del nazismo."
+  },
+  {
+    titolo: "Mein Kampf — Il significato della svastica",
+    data: "1925–1926",
+    autore: "Adolf Hitler",
+    testo: "«[…] Nel rosso riconosciamo l'idea sociale del movimento, nel bianco l'idea nazionalista, nella croce uncinata l'impegno a combattere per l'affermazione dell'uomo ariano e per il diffondersi della tendenza al lavoro creativo, che fu e sarà sempre antisemitico.»",
+    commento: "La svastica è un simbolo antichissimo e augurale, diffuso in praticamente tutta l'Asia, dall'India al Giappone. Hitler la conosce avendone studiato l'origine e la adotta per il partito nella rappresentazione di una svastica nera, in un cerchio bianco su fondo rosso. In moltissimi Stati l'esibizione di questo simbolo è oggi considerata un reato, ricadendo nelle fattispecie di apologia del nazifascismo o di incitamento all'odio."
+  },
+  {
+    titolo: "Un ideologo del regime — Il «soldato del lavoro»",
+    data: "Anni Trenta",
+    autore: "Ideologo nazionalsocialista",
+    testo: "«Imprenditori e lavoratori non si contrappongono più come nemici, che mercanteggiano per profitto e salari, ma sono soldati del lavoro, dei quali l'uno comanda e l'altro obbedisce in relazione all'obiettivo da raggiungere, perché dal lavoro il popolo non deve trarre soltanto il pane quotidiano, ma, al di là di esso, valori eterni della sua energia creatrice.»",
+    commento: "Il regime, mirante alla compattezza sociale asservita ai suoi scopi, pretendeva l'ordine e non poteva accettare nessuna forma di conflitto sociale. Seguendo la pista corporativista, il nazismo eliminò qualsiasi componente sindacale."
+  },
+  {
+    titolo: "Mit brennender Sorge — L'enciclica di Pio XI",
+    data: "1937",
+    autore: "Papa Pio XI",
+    testo: "«Chi esalta la razza, o il popolo, o lo Stato, o la forma dello Stato, o i detentori del potere statale [...] al di sopra del loro valore e della loro sfera di azione, deificandoli con culto idolatrico, perverte ed altera l'ordine del mondo creato e voluto da Dio.»",
+    commento: "Non vi fu alcuna manifestazione concreta di opposizione della Chiesa contro il regime, se non nel 1937 quando, con questa enciclica, il pontefice si lamenta della violazione del Concordato. I nazisti perseguitarono anche migliaia di cattolici in seguito all'enciclica, deportandoli a Dachau. La Chiesa protestante si piegò a Hitler, e i pochi dissidenti furono deportati nei campi di concentramento."
+  }
+];
+
+const antisemitismoData = [
+  {
+    data: "1° aprile 1933",
+    titolo: "Boicottaggio nazionale delle attività ebraiche",
+    fase: "discriminazione",
+    desc: "Il 1° aprile 1933, membri delle SA e delle SS, alle 10 in punto del mattino, si appostano davanti ai negozi e alle attività degli ebrei, per informare avventori e clienti che quei negozi e quelle attività sono di cittadini ebrei, invitando i clienti a non entrare. Il boicottaggio finisce a mezzanotte, ma in diverse parti della Germania si registrano episodi di violenza. A Kiel un avvocato ebreo viene ucciso.",
+    cons: ["Primo atto di persecuzione economica organizzata dallo Stato", "Episodi di violenza in diverse città tedesche", "Avvio dell'esclusione degli ebrei dalle professioni liberali"]
+  },
+  {
+    data: "1933–1935",
+    titolo: "Esclusione dalle professioni liberali",
+    fase: "discriminazione",
+    desc: "Sin dal 1935 si proibisce agli ebrei l'accesso alle professioni liberali. Molti ebrei lasciano il Paese, incoraggiati da tedeschi che ancora non hanno avviato politiche di sterminio. Tra il 1933 e il 1939 emigrano circa 280.000 ebrei tedeschi, tra i quali molti scienziati, artisti e intellettuali.",
+    cons: ["Fuga di scienziati, artisti e intellettuali ebrei", "Espulsione dall'amministrazione pubblica", "Svuotamento graduale della comunità ebraica"]
+  },
+  {
+    data: "15 settembre 1935",
+    titolo: "Leggi di Norimberga",
+    fase: "legislazione razziale",
+    desc: "Il Parlamento tedesco, riunito a Norimberga, approva le prime leggi antisemite all'unanimità. Si vietano i matrimoni misti e si sciolgono quelli già esistenti; si vietano i rapporti sessuali tra ebrei e tedeschi; le donne tedesche sopra i 45 anni non possono più avere datori di lavoro ebrei. Le leggi forniscono anche la definizione nazista di ebreo: chiunque abbia almeno tre nonni ebrei o pratichi l'ebraismo. Nella Germania degli anni Trenta, su 67 milioni di abitanti, solo mezzo milione era ebreo. Questo criterio causò una sovrastima degli ebrei, classificando come tali anche molti esponenti del clero cattolico e protestante.",
+    cons: ["Gli ebrei perdono la cittadinanza tedesca", "Matrimoni misti esistenti vengono sciolti", "Migliaia classificati come ebrei per via dei nonni, inclusi esponenti del clero"]
+  },
+  {
+    data: "9–10 novembre 1938",
+    titolo: "La notte dei cristalli (Kristallnacht)",
+    fase: "violenza di massa",
+    desc: "Un giovane ebreo uccide a Parigi il diplomatico Ernst von Rath. La reazione dei tedeschi è durissima. In tutta la Germania si dà vita a veri e propri pogrom. Migliaia di ebrei vengono assassinati, arrestati senza giusto motivo, picchiati. I tedeschi incendiano le sinagoghe, distruggono le vetrine delle attività commerciali ebree — da qui il nome Kristallnacht. Ai vigili del fuoco era stato intimato di non rispondere alle richieste di soccorso provenienti da ebrei.",
+    cons: ["Punto di non ritorno: la violenza di massa diventa aperta e organizzata dallo Stato", "Avvio della ghettizzazione e dell'obbligo della stella di David", "Inizio del percorso verso la Soluzione finale"]
+  },
+  {
+    data: "Dopo la Kristallnacht",
+    titolo: "Dissimilazione e ghettizzazione",
+    fase: "segregazione",
+    desc: "Il governo tedesco procede alla dissimilazione, ovvero alla completa separazione degli ebrei dal corpo nazionale tedesco. Provvedimenti in questo senso sono la ghettizzazione e l'obbligo di portare la stella di David come segno di riconoscimento. Agli ebrei viene tolta anche la cittadinanza, e quelli che non erano fuggiti nel 1935 sono destinati a rimanere in Germania e ad essere deportati.",
+    cons: ["Obbligo della stella di David", "Ghettizzazione forzata nelle città", "Privazione definitiva della cittadinanza"]
+  }
+];
+
+const propagandaData = [
+  {
+    titolo: "Il Ministero della Propaganda",
+    responsabile: "Joseph Göbbels",
+    desc: "Al gerarca nazista Göbbels viene affidato l'importantissimo Ministero della Propaganda e dell'Informazione, ruolo che conserva per tutta la durata del regime. Questo ministero utilizza in maniera massiva marce, manifestazioni, parate e raduni, abilmente organizzati e dalla regia impeccabile.",
+    strumenti: ["Controllo totale di stampa, radio e cinema", "Roghi di libri di autori invisi al regime, in molti casi ebrei", "Accanimento contro ogni forma di arte moderna, considerata degenerata"]
+  },
+  {
+    titolo: "La radio come strumento di massa",
+    responsabile: "Ministero della Propaganda",
+    desc: "La nazificazione della Germania passa per una titanica opera di irreggimentazione delle masse. Fondamentale è l'utilizzo della radio, che consente di raggiungere milioni di famiglie. Analogamente al fascismo, il nazismo utilizza il cinema a scopo propagandistico.",
+    strumenti: ["Radio: mezzo di massa nelle case tedesche", "Cinema come vettore dell'ideologia razzista", "Campagne a favore dell'eugenetica e dell'antisemitismo"]
+  },
+  {
+    titolo: "Gioventù Hitleriana",
+    responsabile: "Regime nazista",
+    desc: "Come per il fascismo, i giovani e giovanissimi vengono inquadrati in diverse associazioni educative e paramilitari. L'obiettivo è formare una generazione completamente nazificata: attività sportive, campi estivi, educazione ideologica, canti e marce.",
+    strumenti: ["Inquadramento dei giovani dai 10 ai 18 anni", "Associazioni distinte per età e sesso", "Educazione ideologica sistematica"]
+  },
+  {
+    titolo: "Controllo della cultura",
+    responsabile: "Joseph Göbbels",
+    desc: "Göbbels si occupa di ridefinire la cultura della Germania nazista. Lo fa attraverso i roghi di libri di autori invisi al regime, in molti casi ebrei. Il regime si accanisce contro ogni forma di arte moderna, considerata come degenerata rispetto a quella classica, l'unica accettabile.",
+    strumenti: ["Roghi di libri il 10 maggio 1933", "Mostra dell'Arte Degenerata (Entartete Kunst)", "Migliaia di scienziati, artisti, musicisti e intellettuali fuggono dal Paese"]
+  }
+];
+
+const economiaData = [
+  {
+    titolo: "La crisi che alimenta il nazismo",
+    periodo: "1929–1933",
+    desc: "L'economia tedesca, dopo una timida ripresa dal 1925-1926 grazie ai finanziamenti del Piano Dawes, crolla nuovamente per effetto della crisi del 1929, che si riversa sulla Germania in maniera pesantissima. In questo clima cresce politicamente, nei primissimi anni Trenta, il partito guidato da Hitler.",
+    dati: ["Disoccupazione di massa nella Germania dei primi anni Trenta", "Fallimenti bancari a catena", "Piano Dawes (1924) aveva consentito una timida ripresa, poi azzerata dal '29"]
+  },
+  {
+    titolo: "Il Servizio di Lavoro Nazionale (RAD)",
+    periodo: "Dal 1933",
+    desc: "Nel 1933 Hitler istituisce il Servizio di Lavoro Nazionale (Reichsarbeitsdienst, RAD), nell'ottica di diminuire la disoccupazione e, allo stesso tempo, indottrinare i lavoratori. Tutti gli uomini tra i 18 e i 25 anni devono essere addestrati per sei mesi al lavoro nel RAD.",
+    dati: ["Uniformi, campi militarizzati, pagamento con una diaria (non uno stipendio)", "Obbligo per tutti i maschi tra 18 e 25 anni", "Obiettivo duplice: ridurre la disoccupazione e indottrinare politicamente"]
+  },
+  {
+    titolo: "Il corporativismo nazista",
+    periodo: "Dal 1933",
+    desc: "Seguendo la pista corporativista, il nazismo elimina qualsiasi componente sindacale. Il regime, mirante alla compattezza sociale asservita ai suoi scopi, pretende l'ordine e non può accettare nessuna forma di conflitto sociale. La politica economica è un mero mezzo al servizio della politica di potenza.",
+    citazione: "«Imprenditori e lavoratori non si contrappongono più come nemici, che mercanteggiano per profitto e salari, ma sono soldati del lavoro, dei quali l'uno comanda e l'altro obbedisce in relazione all'obiettivo da raggiungere.»",
+    dati: ["Sindacati eliminati", "Sciopero vietato come forma di conflitto sociale", "La politica economica è funzionale alla politica di potenza"]
+  },
+  {
+    titolo: "Il riarmo come motore economico",
+    periodo: "Dal 1936",
+    desc: "Quando nel 1936 si vara un piano economico quadriennale, la maggior parte della manodopera disponibile viene indirizzata verso l'industria pesante e bellica: costruzione di armamenti per esercito, marina ed aviazione.",
+    dati: ["Piano quadriennale (1936) come motore del riarmo totale", "Spesa militare in crescita esponenziale dal 1933", "Violazione sistematica dei limiti imposti dal Trattato di Versailles"]
+  },
+  {
+    titolo: "La disoccupazione «azzerata»",
+    periodo: "1939",
+    desc: "Nel 1939 la Germania si vanta di aver azzerato la disoccupazione. Per certi versi questo era vero: la disoccupazione era scesa a zero perché le donne venivano invitate a rimanere a casa e molti cittadini indesiderati erano emigrati, o ghettizzati o uccisi.",
+    dati: ["Donne invitate a uscire dal mercato del lavoro", "Ebrei e indesiderati emigrati, ghettizzati o uccisi", "L'economia di guerra maschera le contraddizioni strutturali"]
+  }
+];
+
+/* ═══ RENDER ═══ */
+
+function buildTimeline() {
+  document.getElementById('timeline-container').innerHTML = timelineData.map(ev => `
+    <div class="tl-item" data-cat="${ev.categoria}">
+      <span class="cat-badge cat-${ev.categoria}">${ev.categoria}</span>
+      <div class="tl-data">${ev.data}</div>
+      <div class="tl-titolo">${ev.titolo}</div>
+      <div class="tl-desc">${ev.desc}</div>
+      ${ev.img ? `<div class="tl-photo"><img src="${ev.img}" alt="${ev.imgAlt || ''}"><p class="tl-photo-cap">${ev.imgCap || ''}</p></div>` : ''}
+    </div>`).join('');
+}
+
+function filterTimeline(cat, btn) {
+  document.querySelectorAll('#tl-filters .tl-filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tl-item').forEach(item => {
+    item.classList.toggle('hidden', cat !== 'all' && item.dataset.cat !== cat);
+  });
+}
+
+function buildIdeologia() {
+  document.getElementById('ideologia-container').innerHTML = ideologiaData.map(i => `
+    <div class="idea-card">
+      <div class="idea-titolo">${i.titolo}</div>
+      <div class="idea-sub">${i.sottotitolo}</div>
+      <div class="idea-corpo">${i.corpo}</div>
+      <div class="idea-tags">${i.tag.map(t => `<span class="idea-tag">${t}</span>`).join('')}</div>
+    </div>`).join('');
+}
+
+function buildPersonaggi() {
+  document.getElementById('personaggi-container').innerHTML = personaggiData.map(p => `
+    <div class="pers-card">
+      ${p.img ? `<img class="pers-photo" src="${p.img}" alt="Ritratto di ${p.nome}" loading="lazy">` : ''}
+      <div class="pers-body">
+        <div class="pers-nome">${p.nome}</div>
+        <div class="pers-date">${p.date}</div>
+        <div class="pers-ruolo pers-${p.fazione}">${p.ruolo}</div>
+        <div class="pers-bio">${p.bio}</div>
+      </div>
+    </div>`).join('');
+}
+
+function buildDocumenti() {
+  document.getElementById('documenti-container').innerHTML = documentiData.map(d => `
+    <div class="doc-card">
+      <div class="doc-meta">
+        <span class="doc-data">${d.data}</span>
+        <span class="doc-autore">${d.autore}</span>
+      </div>
+      <div class="doc-titolo">${d.titolo}</div>
+      <blockquote class="doc-testo">${d.testo}</blockquote>
+      <details><summary>Commento storico</summary><div class="doc-commento">${d.commento}</div></details>
+    </div>`).join('');
+}
+
+function buildAntisemitismo() {
+  document.getElementById('antisem-container').innerHTML = antisemitismoData.map(a => `
+    <div class="antisem-card">
+      <div class="antisem-header">
+        <span class="antisem-data">${a.data}</span>
+        <span class="antisem-fase">${a.fase}</span>
+      </div>
+      <div class="antisem-titolo">${a.titolo}</div>
+      <div class="antisem-desc">${a.desc}</div>
+      <div class="antisem-cons-title">Conseguenze</div>
+      <ul class="antisem-cons">${a.cons.map(c => `<li>${c}</li>`).join('')}</ul>
+    </div>`).join('');
+}
+
+function buildPropaganda() {
+  document.getElementById('prop-container').innerHTML = propagandaData.map(p => `
+    <div class="prop-card">
+      <div class="prop-titolo">${p.titolo}</div>
+      <div class="prop-resp">${p.responsabile}</div>
+      <div class="prop-desc">${p.desc}</div>
+      <div class="prop-strumenti-title">Strumenti</div>
+      <ul class="prop-strumenti">${p.strumenti.map(s => `<li>${s}</li>`).join('')}</ul>
+    </div>`).join('');
+}
+
+function buildEconomia() {
+  document.getElementById('eco-container').innerHTML = economiaData.map(e => `
+    <div class="eco-card">
+      <span class="eco-periodo">${e.periodo}</span>
+      <div class="eco-titolo">${e.titolo}</div>
+      <div class="eco-desc">${e.desc}</div>
+      ${e.citazione ? `<blockquote class="eco-citazione">${e.citazione}</blockquote>` : ''}
+      <div class="eco-dati">${e.dati.map(d => `<div class="eco-dato">${d}</div>`).join('')}</div>
+    </div>`).join('');
+}
+
+/* ═══ TAB ═══ */
+function showTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  btn.classList.add('active');
+  updateTTS();
+}
+
+/* ═══ TTS ═══ */
+function getReadableText() {
+  return (document.querySelector('.section.active') || {}).innerText?.replace(/\\s+/g, ' ').trim() || '';
+}
+function updateTTS() {
+  document.getElementById('tts-play').classList.toggle('visible', getReadableText().length > 0);
+}
+function ttsPlay() {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(getReadableText());
+  u.lang = 'it-IT'; u.rate = 0.92;
+  u.onend = () => document.getElementById('tts-stop').classList.remove('visible');
+  window.speechSynthesis.speak(u);
+  document.getElementById('tts-stop').classList.add('visible');
+}
+function ttsStop() {
+  window.speechSynthesis.cancel();
+  document.getElementById('tts-stop').classList.remove('visible');
+}
+
+/* ═══ ALTA LEGGIBILITÀ ═══ */
+function toggleLegg() {
+  const root = document.documentElement;
+  const btn = document.getElementById('legg-btn');
+  const on = root.classList.toggle('alta-legg');
+  btn.classList.toggle('active', on);
+  btn.textContent = on ? 'Aa ✓' : 'Aa';
+}
+
+/* ═══ INIT ═══ */
+document.addEventListener('DOMContentLoaded', () => {
+  buildTimeline(); buildIdeologia(); buildPersonaggi(); buildDocumenti();
+  buildAntisemitismo(); buildPropaganda(); buildEconomia();
+  updateTTS();
+});
+</script>
+</body>
+</html>
