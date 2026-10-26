@@ -396,9 +396,6 @@ details[open] summary { color: var(--fg); }
     <p class="sec-subtitle">Dal crollo del '29 all'economia di guerra</p>
     <div class="eco-list" id="eco-container"></div>
 
-    <div class="chart-embed">
-      <iframe title="Spese militari della Germania Nazista rispetto al PIL" aria-label="Colonne raggruppate" id="datawrapper-chart-fS6T6" src="https://datawrapper.dwcdn.net/fS6T6/2/" scrolling="no" frameborder="0" style="width: 0; min-width: 100% !important; border: none;" height="890" data-external="1"></iframe>
-    </div>
   </section>
 
 </main>
@@ -761,7 +758,8 @@ const economiaData = [
     titolo: "Il riarmo come motore economico",
     periodo: "Dal 1936",
     desc: "Quando nel 1936 si vara un piano economico quadriennale, la maggior parte della manodopera disponibile viene indirizzata verso l'industria pesante e bellica: costruzione di armamenti per esercito, marina ed aviazione.",
-    dati: ["Piano quadriennale (1936) come motore del riarmo totale", "Spesa militare in crescita esponenziale dal 1933", "Violazione sistematica dei limiti imposti dal Trattato di Versailles"]
+    dati: ["Piano quadriennale (1936) come motore del riarmo totale", "Spesa militare in crescita esponenziale dal 1933", "Violazione sistematica dei limiti imposti dal Trattato di Versailles"],
+    chart: '<iframe title="Spese militari della Germania Nazista rispetto al PIL" aria-label="Colonne raggruppate" id="datawrapper-chart-fS6T6" src="https://datawrapper.dwcdn.net/fS6T6/2/" scrolling="no" frameborder="0" style="width:0;min-width:100%!important;border:none;" height="890" data-external="1"></iframe>'
   },
   {
     titolo: "La disoccupazione «azzerata»",
@@ -862,6 +860,7 @@ function buildEconomia() {
       <div class="eco-desc">${e.desc}</div>
       ${e.citazione ? `<blockquote class="eco-citazione">${e.citazione}</blockquote>` : ''}
       <div class="eco-dati">${e.dati.map(d => `<div class="eco-dato">${d}</div>`).join('')}</div>
+      ${e.chart ? `<div class="tl-chart" style="margin-top:1rem">${e.chart}</div>` : ''}
     </div>`).join('');
 }
 
