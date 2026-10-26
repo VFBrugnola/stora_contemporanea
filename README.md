@@ -6,63 +6,49 @@ Raccoglie e linka le dashboard interattive per argomento, con indicazione dello 
 **GitHub Pages:** https://vfbrugnola.github.io/storia_contemporanea/
 
 ## Le dashboard
+
 ### Come sono costruite?
-I contenuti derivano dal mio blog. Le varie dashboard sono sviluppate in *vibecoding* con Claude AI. Tutti i contenuti sono riletti e supervisionati.
+I contenuti derivano dalle lezioni dell'autore. Le dashboard sono sviluppate in *vibecoding* con Claude AI. Tutti i contenuti sono riletti e supervisionati.
+
 ### Scopo delle dashboard
-Le dashboard hanno uno scopo didattico.
+Le dashboard hanno uno scopo didattico, rivolte agli studenti del liceo.
+
+---
+
+## Dashboard disponibili
+
+| Argomento | Link | Stato |
+|---|---|---|
+| Prima guerra mondiale | [la-grande-guerra](https://vfbrugnola.github.io/storia_contemporanea/la-grande-guerra/) | ✅ Disponibile |
+| Il fascismo in Italia | [il-fascismo-in-italia](https://vfbrugnola.github.io/storia_contemporanea/il-fascismo-in-italia/) | ✅ Disponibile |
+| Il nazismo in Germania | [il-nazismo](https://vfbrugnola.github.io/storia_contemporanea/il-nazismo/) | ✅ Disponibile |
+| Seconda guerra mondiale | [la-seconda-guerra-mondiale](https://vfbrugnola.github.io/storia_contemporanea/la-seconda-guerra-mondiale/) | ✅ Disponibile |
 
 ---
 
 ## Struttura del repo
 
 ```
-stora_contemporanea/
-├── index.html          # Pagina hub — navigazione per secolo e argomento
-└── shared/
-    └── style.css       # Sistema CSS strutturale condiviso tra tutte le dashboard
+storia_contemporanea/
+├── index.html                        # Pagina hub — navigazione per secolo e argomento
+├── la-grande-guerra/
+│   └── index.html
+├── il-fascismo-in-italia/
+│   └── index.html
+├── il-nazismo/
+│   ├── index.html
+│   └── assets/img/                   # Immagini locali della dashboard
+└── la-seconda-guerra-mondiale/
+    └── index.html
 ```
 
-## Dashboard collegate
-
-| Argomento | Link | Stato |
-|---|---|---|
-| Prima guerra mondiale | [la-grande-guerra](https://vfbrugnola.github.io/storia_contemporanea/) | ✅ Disponibile |
-| Il fascismo | [il-fascismo](https://vfbrugnola.github.io/storia_contemporanea/il-fascismo-in-italia/) | ✅ Disponibile |
-| Seconda guerra mondiale | [la-seconda-guerra-mondiale](https://vfbrugnola.github.io/storia_contemporanea/la-seconda-guerra-mondiale/) | ✅ Disponibile |
-
-## Sistema CSS condiviso
-
-`shared/style.css` definisce la struttura comune a tutte le dashboard: layout, componenti (nav, tabs, slider, card, modal, leaflet overrides, bar chart) e un **token contract** — i nomi delle variabili CSS che ogni dashboard deve sovrascrivere con i propri colori e font.
-
-Per usarlo in una nuova dashboard:
-
-```html
-<link rel="stylesheet" href="https://vfbrugnola.github.io/stora_contemporanea/shared/style.css">
-```
-
-Poi nella `:root` della dashboard si ridefiniscono solo i token di colore:
-
-```css
-:root {
-  --bg: #0d0d0f;
-  --bg2: #141416;
-  --bg3: #1a1a1e;
-  --fg: #d4c9b0;
-  --fg2: #8a8070;
-  --fg3: #5a5040;
-  --accent: #c9963a;
-  --accent2: #e8b84b;
-  --border: #2a2520;
-  --font-serif: "Georgia", serif;
-  --font-ui: system-ui, sans-serif;
-}
-```
-
-## Aggiungere un nuovo argomento
-
-1. Creare un nuovo repo GitHub per la dashboard
-2. Aggiungere il link nel file `index.html` di questo repo (sostituire il placeholder corrispondente)
-3. Importare `shared/style.css` e definire i token colore nella nuova dashboard
+Ogni dashboard è un file HTML **self-contained**: nessuna dipendenza da file JS o CSS esterni al repo. I dati sono inlineati direttamente nello script.
 
 ---
 
+## Aggiungere una nuova dashboard
+
+1. Creare una cartella con il nome dell'argomento (es. `rivoluzione-russa/`)
+2. Inserire un `index.html` self-contained con dati inline
+3. Aggiungere la card nell'`index.html` dell'hub (sostituire il placeholder corrispondente)
+4. Fare il push — GitHub Pages deploya automaticamente
