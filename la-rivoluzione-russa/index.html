@@ -1630,6 +1630,7 @@ function renderTimeline(filter) {
       </div>
       <div class="tl-titolo">${ev.titolo}</div>
       <div class="tl-desc">${ev.descrizione}</div>
+      ${ev.img ? `<figure style="margin:.85rem 0 .25rem;"><img src="${ev.img}" alt="${ev.titolo}" style="max-width:100%;width:420px;display:block;border-radius:6px;border:1px solid var(--border);"><figcaption style="font-size:.70rem;color:var(--fg3);margin-top:.35rem;line-height:1.4;">🗺️ ${ev.imgCredito||''}</figcaption></figure>` : ''}
     `;
     list.appendChild(item);
   });

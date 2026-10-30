@@ -132,6 +132,8 @@ const TIMELINE = [
     data: '3 marzo 1918',
     titolo: 'Pace di Brest-Litovsk',
     descrizione: 'La Russia firma la pace separata con gli Imperi Centrali. I termini sono durissimi: la Russia cede Polonia, Finlandia, Estonia, Lettonia, Lituania, Ucraina, Bielorussia — oltre un quarto del territorio europeo. Lenin accetta l\'umiliazione per poter concentrare le forze sulla guerra civile. Trotsky aveva tentato la formula "né pace né guerra".',
+    img: './img/brest-litovsk.png',
+    imgCredito: 'Cartina: territori ceduti dalla Russia con la pace di Brest-Litovsk (3 marzo 1918) · Elaborazione propria',
     cat: 'guerra',
     tags: ['brest-litovsk', 'wwi', 'ucraina', 'pace']
   },
