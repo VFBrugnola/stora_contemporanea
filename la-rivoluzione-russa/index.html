@@ -1745,14 +1745,13 @@ const modalClose = document.getElementById('modal-close');
 function openModal(p) {
   const avatarEl = document.getElementById('modal-avatar');
   if (p.img) {
-    avatarEl.innerHTML = `<img src="${p.img}" alt="${p.nome} ${p.cognome}" class="pers-modal-photo" style="width:52px;height:52px;margin:0;">`;
-    avatarEl.style.background = 'transparent';
+    avatarEl.innerHTML = `<img src="${p.img}" alt="${p.nome} ${p.cognome}" style="width:72px;height:72px;border-radius:50%;object-fit:cover;object-position:center top;display:block;border:2px solid var(--accent);flex-shrink:0;">`;
+    avatarEl.style.cssText = 'width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:transparent;overflow:hidden;';
   } else {
     avatarEl.innerHTML = '';
     avatarEl.textContent = p.iniziali;
-    avatarEl.style.background = p.colore;
+    avatarEl.style.cssText = `width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:${p.colore};font-family:var(--font-serif);font-size:1.1rem;font-weight:600;color:#fff;letter-spacing:.02em;`;
   }
-  document.getElementById('modal-avatar').style.background = p.img ? 'transparent' : p.colore;
   document.getElementById('modal-nome').textContent = p.nome + ' ' + p.cognome;
   document.getElementById('modal-anni').textContent = p.anni;
   document.getElementById('modal-label-wrap').innerHTML = `<span class="pg-label" style="background:${p.colore};font-size:.70rem;padding:.15rem .5rem;">${p.label}</span>`;
