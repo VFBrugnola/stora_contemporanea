@@ -786,6 +786,48 @@ button { cursor: pointer; font-family: inherit; }
   margin-bottom: .2rem;
 }
 
+/* ─── FIGURE MAPPA ─── */
+.gc-map-fig {
+  margin: 1.5rem 0;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+.gc-map-img {
+  display: block;
+  width: 100%;
+  max-width: 700px;
+  margin: 0 auto;
+}
+.gc-map-caption {
+  padding: .85rem 1rem;
+  font-size: .8rem;
+  line-height: 1.6;
+  color: var(--fg2);
+  border-top: 1px solid var(--border);
+}
+.gc-map-fonte {
+  display: block;
+  margin-top: .4rem;
+  font-size: .74rem;
+  color: var(--fg2);
+  opacity: .75;
+}
+
+/* ─── PERSONAGGIO FOTO ─── */
+.pers-modal-photo {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  object-position: center top;
+  border-radius: 50%;
+  border: 3px solid var(--accent);
+  display: block;
+  margin: 0 auto 1rem;
+  flex-shrink: 0;
+}
+
 /* ─── GUERRA CIVILE ─── */
 .gc-intro {
   background: var(--card);
@@ -1325,6 +1367,16 @@ button { cursor: pointer; font-family: inherit; }
       </div>
     </div>
 
+    <!-- Mappa Brest-Litovsk -->
+    <figure class="gc-map-fig">
+      <img src="./img/brest-litovsk.png" alt="Mappa: La Russia dopo la pace di Brest-Litovsk (1918)" class="gc-map-img">
+      <figcaption class="gc-map-caption">
+        <strong>La Russia dopo la pace di Brest-Litovsk (marzo 1918).</strong>
+        Con tale accordo la Russia cedeva agli Imperi Centrali l'Ucraina, la Finlandia, l'Estonia, la Lettonia e la Lituania; la Polonia riemersa come Stato indipendente. I territori hatturati indicano le perdite territoriali russe.
+        <span class="gc-map-fonte">Fonte: Zanichelli / Storia Digitale</span>
+      </figcaption>
+    </figure>
+
     <!-- Comunismo di guerra -->
     <div class="ctx-section" style="margin-top:2rem;">
       <h3 class="ctx-title">Il comunismo di guerra (1918–1921)</h3>
@@ -1690,8 +1742,17 @@ PERSONAGGI.forEach(p => {
 const modalBg = document.getElementById('modal-bg');
 const modalClose = document.getElementById('modal-close');
 function openModal(p) {
-  document.getElementById('modal-avatar').textContent = p.iniziali;
-  document.getElementById('modal-avatar').style.background = p.colore;
+  const avatarEl = document.getElementById('modal-avatar');
+  if (p.img) {
+    avatarEl.innerHTML = `<img src="${p.img}" alt="${p.nome} ${p.cognome}" class="pers-modal-photo" style="width:52px;height:52px;margin:0;">`;
+    avatarEl.style.background = 'transparent';
+    avatarEl.textContent = '';
+  } else {
+    avatarEl.innerHTML = '';
+    avatarEl.textContent = p.iniziali;
+    avatarEl.style.background = p.colore;
+  }
+  document.getElementById('modal-avatar').style.background = p.img ? 'transparent' : p.colore;
   document.getElementById('modal-nome').textContent = p.nome + ' ' + p.cognome;
   document.getElementById('modal-anni').textContent = p.anni;
   document.getElementById('modal-label-wrap').innerHTML = `<span class="pg-label" style="background:${p.colore};font-size:.70rem;padding:.15rem .5rem;">${p.label}</span>`;

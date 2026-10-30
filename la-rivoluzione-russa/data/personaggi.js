@@ -19,6 +19,7 @@ const PERSONAGGI = [
   },
   {
     id: 'p02',
+    img: './img/lenin.jpg',
     nome: 'Vladimir Il\'ič',
     cognome: 'Lenin',
     anni: '1870 – 1924',
