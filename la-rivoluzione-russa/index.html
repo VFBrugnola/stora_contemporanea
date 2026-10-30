@@ -1519,6 +1519,7 @@ button { cursor: pointer; font-family: inherit; }
       <p style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--fg3);margin-bottom:.3rem;" id="modal-ruolo"></p>
       <div class="modal-bio" id="modal-bio"></div>
       <dl class="modal-dati" id="modal-dati"></dl>
+      <p id="modal-credito" style="display:none;margin-top:.75rem;font-size:.70rem;color:var(--fg3);line-height:1.4;"></p>
     </div>
   </div>
 </div>
@@ -1744,7 +1745,7 @@ const modalClose = document.getElementById('modal-close');
 function openModal(p) {
   const avatarEl = document.getElementById('modal-avatar');
   if (p.img) {
-    avatarEl.innerHTML = `<img src="${p.img}" alt="${p.nome} ${p.cognome}" class="pers-modal-photo" style="width:52px;height:52px;margin:0;">`;
+    avatarEl.innerHTML = `<img src="${p.img}" alt="${p.nome} ${p.cognome}" class="pers-modal-photo" style="width:52px;height:52px;margin:0;" onerror="this.parentElement.innerHTML='';this.parentElement.textContent='${p.iniziali}';this.parentElement.style.background='${p.colore}';">`;
     avatarEl.style.background = 'transparent';
     avatarEl.textContent = '';
   } else {
@@ -1760,6 +1761,13 @@ function openModal(p) {
   document.getElementById('modal-bio').textContent = p.bio;
   const dati = document.getElementById('modal-dati');
   dati.innerHTML = p.dati_chiave.map(d => `<dt>${d.label}</dt><dd>${d.val}</dd>`).join('');
+  const creditoEl = document.getElementById('modal-credito');
+  if (p.imgCredito) {
+    creditoEl.innerHTML = '📷 ' + p.imgCredito;
+    creditoEl.style.display = 'block';
+  } else {
+    creditoEl.style.display = 'none';
+  }
   modalBg.classList.add('open');
   document.body.style.overflow = 'hidden';
 }
