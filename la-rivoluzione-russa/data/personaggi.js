@@ -72,6 +72,7 @@ const PERSONAGGI = [
   },
   {
     id: 'p05',
+    img: './img/stalin.jpg',
     nome: 'Iosif Vissarionovič',
     cognome: 'Stalin',
     anni: '1878 – 1953',
