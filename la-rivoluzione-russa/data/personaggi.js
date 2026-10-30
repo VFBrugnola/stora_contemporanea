@@ -37,6 +37,7 @@ const PERSONAGGI = [
   },
   {
     id: 'p03',
+    img: './img/trotsky.jpg',
     nome: 'Lev Davidovič',
     cognome: 'Trotsky',
     anni: '1879 – 1940',
