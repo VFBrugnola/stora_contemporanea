@@ -1,0 +1,1815 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La Rivoluzione Russa · Dashboard Didattica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+/* ═══════════════════════════════════════════════
+   DESIGN TOKENS — Rivoluzione Russa
+   Rosso rivoluzionario + Oro imperiale
+═══════════════════════════════════════════════ */
+:root {
+  --bg:          #F5EFE4;
+  --bg2:         #EAE1D0;
+  --bg3:         #DDD3BE;
+  --fg:          #1A1008;
+  --fg2:         #4C3820;
+  --fg3:         #826450;
+  --accent:      #9B1C14;
+  --accent2:     #7A100A;
+  --gold:        #B8920E;
+  --gold2:       #9A7A08;
+  --gold-pale:   #F0E6C8;
+  --border:      #CCC0A0;
+  --card:        #FAF6EF;
+  --shadow:      rgba(26,16,8,.10);
+  --shadow2:     rgba(26,16,8,.20);
+  --font-serif:  'Cormorant Garamond', Georgia, serif;
+  --font-ui:     'Inter', system-ui, sans-serif;
+  --r:           6px;
+  --r2:          10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg:        #130C08;
+    --bg2:       #1E1510;
+    --bg3:       #2A1E14;
+    --fg:        #EAE0D0;
+    --fg2:       #B8A080;
+    --fg3:       #7A6050;
+    --accent:    #CC2A1E;
+    --accent2:   #A82018;
+    --gold:      #D4A830;
+    --gold2:     #B8900E;
+    --gold-pale: #281A08;
+    --border:    #3A2C1C;
+    --card:      #1E1510;
+    --shadow:    rgba(0,0,0,.40);
+    --shadow2:   rgba(0,0,0,.60);
+  }
+}
+[data-theme="dark"] {
+  --bg:        #130C08;
+  --bg2:       #1E1510;
+  --bg3:       #2A1E14;
+  --fg:        #EAE0D0;
+  --fg2:       #B8A080;
+  --fg3:       #7A6050;
+  --accent:    #CC2A1E;
+  --accent2:   #A82018;
+  --gold:      #D4A830;
+  --gold2:     #B8900E;
+  --gold-pale: #281A08;
+  --border:    #3A2C1C;
+  --card:      #1E1510;
+  --shadow:    rgba(0,0,0,.40);
+  --shadow2:   rgba(0,0,0,.60);
+}
+[data-theme="light"] {
+  --bg:        #F5EFE4;
+  --bg2:       #EAE1D0;
+  --bg3:       #DDD3BE;
+  --fg:        #1A1008;
+  --fg2:       #4C3820;
+  --fg3:       #826450;
+  --accent:    #9B1C14;
+  --accent2:   #7A100A;
+  --gold:      #B8920E;
+  --gold2:     #9A7A08;
+  --gold-pale: #F0E6C8;
+  --border:    #CCC0A0;
+  --card:      #FAF6EF;
+  --shadow:    rgba(26,16,8,.10);
+  --shadow2:   rgba(26,16,8,.20);
+}
+
+/* ─── CONTESTO ─── */
+.ctx-section { margin-bottom: 2rem; }
+.ctx-title {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: .75rem;
+  padding-bottom: .45rem;
+  border-bottom: 1px solid var(--border);
+}
+.ctx-body { display: flex; flex-direction: column; gap: .75rem; }
+.ctx-body p { font-size: .88rem; line-height: 1.72; color: var(--fg2); }
+.ctx-box {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--r);
+  padding: .85rem 1rem;
+}
+.ctx-box-title {
+  font-weight: 600;
+  font-size: .76rem;
+  color: var(--fg);
+  margin-bottom: .4rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.ctx-box p { font-size: .82rem; line-height: 1.62; color: var(--fg2); margin-top: .35rem; }
+.ctx-box p + p { margin-top: .5rem; }
+.ctx-partiti {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .75rem;
+}
+@media (max-width: 640px) { .ctx-partiti { grid-template-columns: 1fr; } }
+.ctx-partito {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 4px solid currentColor;
+  border-radius: var(--r);
+  padding: .85rem 1rem;
+}
+.ctx-partito-nome {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: .4rem;
+}
+.ctx-partito p { font-size: .82rem; line-height: 1.55; color: var(--fg2); }
+
+/* ─── ALTA LEGGIBILITÀ (DSA) ─── */
+body.alta-leg {
+  font-family: 'OpenDyslexic', 'Comic Sans MS', cursive !important;
+  font-size: 1.08em;
+  letter-spacing: .03em;
+  line-height: 1.8;
+}
+body.alta-leg * { font-family: inherit !important; }
+
+/* ─── RESET & BASE ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-ui);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { cursor: pointer; font-family: inherit; }
+
+/* ─── HEADER ─── */
+#hdr {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: #0D0D0D;
+  color: #EAE0D0;
+  border-bottom: 3px solid var(--accent);
+  padding: 0 1.25rem;
+}
+.hdr-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  height: 64px;
+}
+.hdr-emblem {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+.hdr-text { flex: 1; min-width: 0; }
+.hdr-crumb {
+  font-size: .70rem;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  margin-bottom: 2px;
+}
+.hdr-crumb a { color: #aaa; }
+.hdr-crumb a:hover { color: #fff; }
+.hdr-title {
+  font-family: var(--font-serif);
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.15;
+  color: #FAF6EF;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hdr-sub {
+  font-size: .70rem;
+  color: var(--gold);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+.hdr-actions {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+.hdr-btn {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.15);
+  color: #ccc;
+  border-radius: var(--r);
+  padding: .35rem .7rem;
+  font-size: .72rem;
+  font-family: var(--font-ui);
+  transition: background .15s, color .15s;
+  white-space: nowrap;
+}
+.hdr-btn:hover { background: rgba(255,255,255,.16); color: #fff; }
+.hdr-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ─── TAB NAV ─── */
+#tab-nav {
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  position: sticky;
+  top: 67px;
+  z-index: 190;
+}
+#tab-nav::-webkit-scrollbar { display: none; }
+.tab-row {
+  display: flex;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+.tab-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: .75rem 1.1rem;
+  font-size: .80rem;
+  font-weight: 500;
+  color: var(--fg3);
+  transition: color .15s, border-color .15s;
+  white-space: nowrap;
+}
+.tab-btn:hover { color: var(--fg); }
+.tab-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+/* ─── PANELS ─── */
+.panel { display: none; }
+.panel.active { display: block; }
+.panel-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+/* ─── SECTION HEADINGS ─── */
+.sec-head {
+  margin-bottom: 1.5rem;
+}
+.sec-title {
+  font-family: var(--font-serif);
+  font-size: 1.85rem;
+  font-weight: 600;
+  color: var(--fg);
+  line-height: 1.15;
+}
+.sec-sub {
+  font-size: .82rem;
+  color: var(--fg3);
+  margin-top: .3rem;
+}
+.gold-line {
+  display: block;
+  width: 48px;
+  height: 3px;
+  background: var(--gold);
+  border-radius: 2px;
+  margin: .6rem 0;
+}
+
+/* ─── TIMELINE ─── */
+.tl-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+  margin-bottom: 1.5rem;
+}
+.tl-filter {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: .28rem .8rem;
+  font-size: .74rem;
+  color: var(--fg2);
+  font-family: var(--font-ui);
+  cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.tl-filter.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.tl-filter:hover:not(.on) { border-color: var(--accent); color: var(--accent); }
+
+.tl-list { position: relative; padding-left: 2rem; }
+.tl-list::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+.tl-item {
+  position: relative;
+  margin-bottom: 1.6rem;
+  padding: 1rem 1.1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  transition: box-shadow .15s;
+}
+.tl-item:hover { box-shadow: 0 2px 10px var(--shadow2); }
+.tl-item::before {
+  content: '';
+  position: absolute;
+  left: -1.65rem;
+  top: 1.2rem;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg);
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.tl-item.svolta::before { background: var(--gold); box-shadow: 0 0 0 2px var(--gold); }
+.tl-item.guerra::before { background: #607D8B; box-shadow: 0 0 0 2px #607D8B; }
+.tl-item.economia::before { background: #2E7D32; box-shadow: 0 0 0 2px #2E7D32; }
+.tl-meta {
+  display: flex;
+  gap: .6rem;
+  align-items: center;
+  margin-bottom: .45rem;
+  flex-wrap: wrap;
+}
+.tl-anno {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.tl-data-str {
+  font-size: .72rem;
+  color: var(--fg3);
+}
+.tl-cat-badge {
+  font-size: .66rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  padding: .15rem .55rem;
+  border-radius: 20px;
+  background: var(--bg3);
+  color: var(--fg2);
+}
+.tl-cat-badge.svolta { background: #FFF8E1; color: #7A5C00; }
+.tl-cat-badge.guerra { background: #ECEFF1; color: #37474F; }
+.tl-cat-badge.economia { background: #E8F5E9; color: #1B5E20; }
+.tl-cat-badge.rivolta { background: #EDE7F6; color: #4A148C; }
+.tl-cat-badge.violenza { background: #FFEBEE; color: #B71C1C; }
+[data-theme="dark"] .tl-cat-badge.svolta { background: #2A1E00; color: #D4A830; }
+[data-theme="dark"] .tl-cat-badge.guerra { background: #1A2026; color: #90A4AE; }
+[data-theme="dark"] .tl-cat-badge.economia { background: #0A1E0A; color: #81C784; }
+[data-theme="dark"] .tl-cat-badge.rivolta { background: #1A0E2E; color: #CE93D8; }
+[data-theme="dark"] .tl-cat-badge.violenza { background: #2E0808; color: #EF9A9A; }
+.tl-titolo {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: .45rem;
+}
+.tl-desc {
+  font-size: .85rem;
+  line-height: 1.65;
+  color: var(--fg2);
+}
+.tl-item.hidden { display: none; }
+
+/* ─── MAP + SIDEBAR ─── */
+#map-wrap {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 1rem;
+  min-height: 520px;
+}
+@media (max-width: 768px) {
+  #map-wrap { grid-template-columns: 1fr; }
+  #map-side { order: -1; max-height: 220px; overflow-y: auto; }
+}
+#the-map {
+  height: 520px;
+  border-radius: var(--r2);
+  border: 1px solid var(--border);
+  z-index: 0;
+}
+#map-side {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+.map-item-btn {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: .65rem .85rem;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s, box-shadow .15s;
+  width: 100%;
+  font-family: var(--font-ui);
+}
+.map-item-btn:hover { border-color: var(--accent); }
+.map-item-btn.sel { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.map-item-nome {
+  font-weight: 600;
+  font-size: .84rem;
+  color: var(--fg);
+}
+.map-item-sub {
+  font-size: .72rem;
+  color: var(--fg3);
+}
+.map-item-cat {
+  display: inline-block;
+  font-size: .64rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: .12rem .45rem;
+  border-radius: 20px;
+  background: var(--bg3);
+  color: var(--fg3);
+  margin-top: .3rem;
+}
+.map-info-box {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--r);
+  padding: 1rem;
+  margin-top: 1rem;
+  display: none;
+}
+.map-info-box.vis { display: block; }
+.map-info-nome {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: .3rem;
+}
+.map-info-desc {
+  font-size: .82rem;
+  line-height: 1.6;
+  color: var(--fg2);
+}
+
+/* ─── PERSONAGGI ─── */
+.pg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+.pg-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform .15s, box-shadow .15s;
+}
+.pg-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px var(--shadow2); }
+.pg-header {
+  padding: 1rem;
+  display: flex;
+  gap: .85rem;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+}
+.pg-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  flex-shrink: 0;
+  letter-spacing: .02em;
+}
+.pg-nome {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--fg);
+  line-height: 1.2;
+}
+.pg-cognome {
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+.pg-anni { font-size: .74rem; color: var(--fg3); margin-top: .1rem; }
+.pg-body { padding: .8rem 1rem; }
+.pg-ruolo {
+  font-size: .78rem;
+  color: var(--fg2);
+  line-height: 1.4;
+  margin-bottom: .5rem;
+}
+.pg-label {
+  display: inline-block;
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: .18rem .55rem;
+  border-radius: 20px;
+  color: #fff;
+}
+.pg-bio-short {
+  font-size: .80rem;
+  color: var(--fg3);
+  margin-top: .5rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ─── MODAL ─── */
+.modal-bg {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.65);
+  z-index: 900;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: var(--card);
+  border-radius: var(--r2);
+  width: 100%;
+  max-width: 620px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  border: 1px solid var(--border);
+}
+.modal-hdr {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.25rem 1.25rem 1rem;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--card);
+}
+.modal-close {
+  background: var(--bg3);
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--fg2);
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.modal-close:hover { background: var(--accent); color: #fff; }
+.modal-body { padding: 1.25rem; }
+.modal-bio { font-size: .88rem; line-height: 1.7; color: var(--fg2); margin-bottom: 1rem; }
+.modal-dati {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: .3rem .8rem;
+  background: var(--bg2);
+  border-radius: var(--r);
+  padding: .75rem 1rem;
+  font-size: .80rem;
+}
+.modal-dati dt { color: var(--fg3); font-weight: 500; white-space: nowrap; }
+.modal-dati dd { color: var(--fg); }
+
+/* ─── IDEOLOGIA ─── */
+.id-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+.id-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  overflow: hidden;
+}
+.id-header {
+  padding: .85rem 1rem;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  cursor: pointer;
+  user-select: none;
+}
+.id-icona {
+  font-size: 1.3rem;
+  width: 36px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.id-cat-label {
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: .1rem;
+}
+.id-titolo {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--fg);
+  line-height: 1.2;
+}
+.id-preview {
+  font-size: .76rem;
+  color: var(--fg3);
+  margin-top: .15rem;
+  line-height: 1.4;
+}
+.id-toggle { margin-left: auto; color: var(--fg3); font-size: .9rem; transition: transform .2s; flex-shrink: 0; }
+.id-card.open .id-toggle { transform: rotate(180deg); }
+.id-body { padding: .9rem 1rem; display: none; }
+.id-card.open .id-body { display: block; }
+.id-def { font-size: .84rem; line-height: 1.65; color: var(--fg2); margin-bottom: .75rem; }
+.id-ctx-label {
+  font-size: .70rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: .35rem;
+}
+.id-ctx { font-size: .82rem; line-height: 1.6; color: var(--fg3); margin-bottom: .7rem; }
+.id-quote {
+  border-left: 3px solid var(--gold);
+  padding: .5rem .8rem;
+  background: var(--gold-pale);
+  border-radius: 0 var(--r) var(--r) 0;
+  font-style: italic;
+  font-size: .82rem;
+  color: var(--fg2);
+}
+
+/* ─── FAZIONI ─── */
+.fz-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1rem;
+}
+.fz-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  overflow: hidden;
+}
+.fz-stripe {
+  height: 5px;
+}
+.fz-body { padding: 1rem; }
+.fz-nome {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: .1rem;
+}
+.fz-sotto { font-size: .74rem; color: var(--fg3); margin-bottom: .6rem; }
+.fz-meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: .2rem .6rem;
+  font-size: .78rem;
+  margin-bottom: .75rem;
+  color: var(--fg2);
+}
+.fz-meta dt { color: var(--fg3); font-weight: 500; white-space: nowrap; }
+.fz-pos-label {
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--fg3);
+  margin-bottom: .3rem;
+}
+.fz-pos-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+  margin-bottom: .75rem;
+}
+.fz-pos-list li {
+  font-size: .80rem;
+  color: var(--fg2);
+  padding-left: 1rem;
+  position: relative;
+  line-height: 1.4;
+}
+.fz-pos-list li::before {
+  content: '›';
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: 700;
+}
+.fz-esito {
+  background: var(--bg2);
+  border-radius: var(--r);
+  padding: .6rem .75rem;
+  font-size: .78rem;
+  color: var(--fg2);
+  line-height: 1.5;
+}
+.fz-esito-label {
+  font-weight: 600;
+  color: var(--fg);
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  margin-bottom: .2rem;
+}
+
+/* ─── GUERRA CIVILE ─── */
+.gc-intro {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--r);
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.5rem;
+}
+.gc-intro p { font-size: .88rem; line-height: 1.65; color: var(--fg2); }
+.gc-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+@media (max-width: 640px) { .gc-cols { grid-template-columns: 1fr; } }
+.gc-col {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  overflow: hidden;
+}
+.gc-col-hdr {
+  padding: .75rem 1rem;
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+}
+.gc-col-body { padding: .85rem 1rem; }
+.gc-col-body p { font-size: .83rem; line-height: 1.6; color: var(--fg2); margin-bottom: .6rem; }
+.gc-col-body p:last-child { margin-bottom: 0; }
+.gc-timeline {
+  margin-top: 1.5rem;
+}
+.gc-tl-title {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: 1rem;
+}
+.gc-ev-list { display: flex; flex-direction: column; gap: .65rem; }
+.gc-ev {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  gap: .75rem;
+  align-items: start;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: .7rem .9rem;
+  font-size: .82rem;
+}
+.gc-ev-anno {
+  font-family: var(--font-serif);
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+.gc-ev-testo { color: var(--fg2); line-height: 1.5; }
+
+/* ─── DOCUMENTI ─── */
+.doc-filters {
+  display: flex;
+  gap: .4rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+.doc-filter {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: .28rem .8rem;
+  font-size: .74rem;
+  color: var(--fg2);
+  cursor: pointer;
+  font-family: var(--font-ui);
+  transition: background .15s, color .15s, border-color .15s;
+}
+.doc-filter.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.doc-filter:hover:not(.on) { border-color: var(--accent); color: var(--accent); }
+.doc-list { display: flex; flex-direction: column; gap: 1rem; }
+.doc-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  overflow: hidden;
+}
+.doc-header {
+  padding: .85rem 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1rem;
+  cursor: pointer;
+  user-select: none;
+}
+.doc-titolo {
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+.doc-meta { font-size: .74rem; color: var(--fg3); margin-top: .2rem; }
+.doc-cat-badge {
+  font-size: .66rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: .18rem .55rem;
+  border-radius: 20px;
+  background: var(--bg3);
+  color: var(--fg2);
+  flex-shrink: 0;
+}
+.doc-body { padding: .85rem 1rem; display: none; }
+.doc-card.open .doc-body { display: block; }
+.doc-testo {
+  background: var(--bg2);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 var(--r) var(--r) 0;
+  padding: .85rem 1rem;
+  font-style: italic;
+  font-size: .85rem;
+  line-height: 1.7;
+  color: var(--fg2);
+  margin-bottom: .85rem;
+}
+.doc-commento-label {
+  font-size: .70rem;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: .35rem;
+}
+.doc-commento { font-size: .83rem; line-height: 1.65; color: var(--fg2); }
+.doc-card.hidden { display: none; }
+
+/* ─── L'URSS ─── */
+.urss-lead {
+  background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+  color: #fff;
+  border-radius: var(--r2);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.urss-lead-title {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: .4rem;
+}
+.urss-lead-text { font-size: .88rem; line-height: 1.6; opacity: .92; }
+.urss-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.urss-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 1rem;
+}
+.urss-card-icon { font-size: 1.6rem; margin-bottom: .5rem; }
+.urss-card-title {
+  font-family: var(--font-serif);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: .35rem;
+}
+.urss-card-text { font-size: .82rem; line-height: 1.6; color: var(--fg2); }
+.urss-repubbliche {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  padding: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+.urss-rep-title {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: .85rem;
+}
+.rep-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: .4rem;
+}
+.rep-item {
+  background: var(--bg2);
+  border-radius: var(--r);
+  padding: .5rem .75rem;
+  font-size: .80rem;
+  color: var(--fg2);
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.rep-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+.urss-nep {
+  background: var(--gold-pale);
+  border: 1px solid var(--gold);
+  border-radius: var(--r2);
+  padding: 1.1rem;
+}
+.urss-nep-title {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: .6rem;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.urss-nep-text { font-size: .84rem; line-height: 1.65; color: var(--fg2); }
+
+/* ─── TTS BAR ─── */
+#tts-bar {
+  position: fixed;
+  bottom: 1.25rem;
+  right: 1.25rem;
+  z-index: 300;
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+}
+#tts-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 12px var(--shadow2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform .15s;
+}
+#tts-btn:hover { transform: scale(1.08); }
+#tts-status {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: .28rem .75rem;
+  font-size: .74rem;
+  color: var(--fg2);
+  display: none;
+}
+#tts-status.vis { display: block; }
+
+/* ─── UTILITIES ─── */
+.mt1 { margin-top: .75rem; }
+.mt2 { margin-top: 1.5rem; }
+.visually-hidden { position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0); }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════ HEADER ══════════════════════════ -->
+<header id="hdr">
+  <div class="hdr-inner">
+    <!-- Emblema: stella rossa con anello dorato -->
+    <svg class="hdr-emblem" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <circle cx="22" cy="22" r="20" fill="none" stroke="#C8991A" stroke-width="1.5"/>
+      <polygon points="22,6 25.8,17.4 37.7,17.4 28.5,24.6 31.9,36 22,28.8 12.1,36 15.5,24.6 6.3,17.4 18.2,17.4"
+               fill="#CC2A1E"/>
+    </svg>
+
+    <div class="hdr-text">
+      <div class="hdr-crumb">
+        <a href="../index.html">← Storia Contemporanea</a>
+        <span>›</span>
+        <span>La Rivoluzione Russa</span>
+      </div>
+      <div class="hdr-title">La Rivoluzione Russa</div>
+      <div class="hdr-sub">1905 — 1922 · Dashboard didattica</div>
+    </div>
+
+    <div class="hdr-actions">
+      <button class="hdr-btn" id="btn-al" title="Alta leggibilità (OpenDyslexic)" aria-pressed="false">Aa</button>
+      <button class="hdr-btn" id="btn-tts" title="Leggi ad alta voce" aria-label="Leggi il testo">🔊</button>
+      <button class="hdr-btn" id="btn-theme" title="Cambia tema" aria-label="Cambia tema chiaro/scuro">◐</button>
+    </div>
+  </div>
+</header>
+
+<!-- ══════════════════════════ TAB NAV ══════════════════════════ -->
+<nav id="tab-nav" role="tablist" aria-label="Sezioni della dashboard">
+  <div class="tab-row">
+    <button class="tab-btn active" data-tab="contesto" role="tab" aria-selected="true">Contesto</button>
+    <button class="tab-btn" data-tab="cronologia" role="tab" aria-selected="false">Cronologia</button>
+    <button class="tab-btn" data-tab="mappa" role="tab" aria-selected="false">Mappa</button>
+    <button class="tab-btn" data-tab="personaggi" role="tab" aria-selected="false">Personaggi</button>
+    <button class="tab-btn" data-tab="ideologia" role="tab" aria-selected="false">Ideologie</button>
+    <button class="tab-btn" data-tab="fazioni" role="tab" aria-selected="false">Fazioni</button>
+    <button class="tab-btn" data-tab="guerra-civile" role="tab" aria-selected="false">Guerra Civile</button>
+    <button class="tab-btn" data-tab="documenti" role="tab" aria-selected="false">Documenti</button>
+    <button class="tab-btn" data-tab="urss" role="tab" aria-selected="false">L'URSS</button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════ PANELS ══════════════════════════ -->
+
+<!-- ── CONTESTO ── -->
+<section class="panel active" id="panel-contesto" role="tabpanel">
+  <div class="panel-inner">
+    <div class="sec-head">
+      <h2 class="sec-title">Contesto storico</h2>
+      <span class="gold-line"></span>
+      <p class="sec-sub">I presupposti sociali, economici e politici della Rivoluzione Russa</p>
+    </div>
+
+    <!-- Presupposti sociali -->
+    <div class="ctx-section">
+      <h3 class="ctx-title">La Russia zarista: presupposti sociali ed economici</h3>
+      <div class="ctx-body">
+        <p>Quasi tutti gli Stati occidentali avevano conosciuto, durante l'Ottocento, l'affermazione della classe borghese e della politica liberale. Le monarchie che erano riuscite a conservarsi avevano concesso costituzioni, si erano fatte affiancare da assemblee legislative e parlamenti. L'assolutismo giaceva ormai nel passato degli Stati dell'Europa occidentale.</p>
+        <p>Lo stesso non poteva dirsi per la Russia, governata dall'ultimo zar, <strong>Nicola II (1894–1918)</strong>, della dinastia Romanov. Nella Russia zarista l'antico regime non si era mai pienamente scardinato. Lo zar era un autocrate, sostenuto dall'aristocrazia. Ingredienti di qualsiasi Stato liberale — sindacati, scioperi, libertà di espressione — erano assenti. Lo Stato era attraversato da una forma estrema di nazionalismo che colpì tutte le etnie non russe e i gruppi di religione non ortodossa. Gli ebrei soffrirono particolarmente tale intolleranza, vittime dei <strong>pogrom</strong>.</p>
+        <div class="ctx-box">
+          <div class="ctx-box-title">📌 Pogrom</div>
+          <p>Termine russo che significa letteralmente "distruzione violenta" o "demolizione violenta". Storicamente si riferisce agli episodi di intolleranza e violenza verso le popolazioni semitiche avvenuti in Russia tra Ottocento e Novecento. Il primo pogrom è fatto risalire al tumulto antiebraico di Odessa del 1821.</p>
+        </div>
+        <p>La Russia rimaneva uno Stato per lo più agricolo, in cui i <strong>kulaki</strong> (contadini benestanti) compravano le terre dei contadini più poveri. Sebbene lontana dagli standard britannici, francesi o tedeschi, conobbe anch'essa una significativa industrializzazione. Questa crescita non portò tuttavia benefici sociali diffusi: operai e contadini vivevano in condizioni di vita miserrime.</p>
+      </div>
+    </div>
+
+    <!-- Presupposti teorici -->
+    <div class="ctx-section">
+      <h3 class="ctx-title">I presupposti teorici e politici: PSR e POSDR</h3>
+      <div class="ctx-body">
+        <p>Nella Russia dei primi del Novecento, tutte queste contraddizioni e il malcontento generale trovarono espressione in due partiti principali:</p>
+        <div class="ctx-partiti">
+          <div class="ctx-partito" style="border-left-color:#2E7D32;">
+            <div class="ctx-partito-nome" style="color:#2E7D32;">Partito Socialista Rivoluzionario (PSR)</div>
+            <p>Fondato nel 1902, di ispirazione anarco-populista e legato alle tradizioni agrarie. Credeva che dovessero essere i <strong>contadini</strong> a dare inizio alla rivoluzione in Russia. Il marxismo era estraneo a questo partito.</p>
+          </div>
+          <div class="ctx-partito" style="border-left-color:#A01C12;">
+            <div class="ctx-partito-nome" style="color:#A01C12;">Partito Operaio Socialdemocratico Russo (POSDR)</div>
+            <p>Fondato nel 1898 da <strong>Plechanov (1856–1918)</strong>. A differenza dei socialisti rivoluzionari, individuava negli <strong>operai</strong> i veri attori della rivoluzione.</p>
+          </div>
+        </div>
+        <p>Il POSDR non era tuttavia unito. Al Congresso di Bruxelles del 1903 si formarono due correnti distinte e irreconciliabili:</p>
+        <div class="ctx-partiti">
+          <div class="ctx-partito" style="border-left-color:#A01C12;">
+            <div class="ctx-partito-nome" style="color:#A01C12;">Bolscevichi <span style="font-size:.78rem;font-weight:400;">(bol'šinstvo = maggioritari)</span></div>
+            <p>Guidati da <strong>Lenin</strong>. Secondo loro, operai e contadini erano pronti a rovesciare l'autocrazia zarista e ad instaurare immediatamente un regime socialista.</p>
+          </div>
+          <div class="ctx-partito" style="border-left-color:#C0392B;">
+            <div class="ctx-partito-nome" style="color:#C0392B;">Menscevichi <span style="font-size:.78rem;font-weight:400;">(men'šinstvo = minoritari)</span></div>
+            <p>Guidati da <strong>Martov</strong>. La rivoluzione doveva certamente compiersi, ma preceduta da una rivoluzione borghese — come era accaduto negli Stati occidentali.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lenin -->
+    <div class="ctx-section">
+      <h3 class="ctx-title">La leadership del bolscevismo: Lenin, il leninismo, l'internazionalismo</h3>
+      <div class="ctx-body">
+        <p>A capo dei bolscevichi vi era <strong>Vladimir Il'ič Ul'janov, detto Lenin (1870–1924)</strong>, un intellettuale formatosi nella dottrina di Marx che presto sviluppò una filosofia propria. Secondo Lenin, l'imperialismo non era che l'ultima fase del capitalismo — un capitalismo globalizzato, con lo spostamento dei capitali al di là dei confini nazionali, che poteva continuare ad esistere solo attraverso lo sfruttamento dei Paesi deboli da parte di quelli forti.</p>
+        <p>In questa situazione, la Russia si trovava in una condizione particolare: un paese fortemente arretrato che pur soffriva i mali sociali di un'industrializzazione galoppante, il tutto in un regime autoritario e illiberale come quello zarista. Queste contraddizioni avrebbero permesso alle classi contadina e operaia di unirsi per dare vita alla Rivoluzione.</p>
+        <p>La rivoluzione avrebbe dovuto essere suscitata dall'<strong>avanguardia del proletariato</strong> — il Partito, ossia rivoluzionari di professione — il cui ruolo sarebbe stato quello di guidare la rivoluzione contadina e proletaria, impedendole di ridursi a semplici azioni contro la classe economicamente dominante. Infine, la rivoluzione non doveva rimanere solo in Russia: si sarebbe dovuta diffondere in tutti i Paesi, secondo i principi dell'<strong>internazionalismo proletario</strong>.</p>
+      </div>
+    </div>
+
+    <!-- 1905 -->
+    <div class="ctx-section">
+      <h3 class="ctx-title">Il fallimento della rivoluzione del 1905–1906</h3>
+      <div class="ctx-body">
+        <p>Una prima rivoluzione si verificò nel 1905, anno in cui la Russia subì la sconfitta militare contro il Giappone, perdendo il controllo dell'Estremo Oriente. I fatti iniziarono a San Pietroburgo, dove gli operai svolgevano una vita pessima: undici ore di lavoro giornaliero, nessun giorno di pausa, nessun diritto di sciopero. A gennaio una folla pacifica, guidata dal prete ortodosso <strong>Georgij Gapon</strong>, si diresse verso il palazzo di Nicola II per presentare alcune richieste (giornata di 8 ore, aumento dei salari, libertà sindacale, Assemblea Costituente). La risposta fu la Guardia imperiale, che sparò sulla folla inerme: quel giorno passò alla storia come la <strong>Domenica di Sangue (22 gennaio 1905)</strong>.</p>
+        <p>L'eccidio davanti al Palazzo d'Inverno incrinò profondamente la fiducia del popolo russo verso il monarca. Iniziarono scioperi e manifestazioni, e nacquero i <strong>Soviet</strong> (letteralmente "consigli") — assemblee di rappresentanti degli operai che divennero anche i centri dell'insurrezione armata. La rivoluzione non si compì tuttavia: i Soviet rimasero isolati e la massa contadina rimase per lo più estranea alle agitazioni.</p>
+        <div class="ctx-box" style="border-left-color:var(--gold);">
+          <div class="ctx-box-title">⚖ Lo pseudoparlamentarismo zarista</div>
+          <p>Nicola II intraprese un percorso di riforme insufficienti e troppo timide che non scalfirono il potere dello zar. Le prime elezioni politiche per la <strong>Duma</strong> (1906) non portarono a un vero parlamento: ogni risoluzione era soggetta all'eventuale veto dello zar. La Duma era più simile agli Stati Generali pre-rivoluzionari francesi che a un parlamento nel senso di una monarchia parlamentare.</p>
+          <p>La Duma fu anzi sciolta quando le sue risoluzioni andavano nella direzione di una riforma agraria. Il Ministro degli Interni <strong>Stolypin</strong> cercò di riformare la situazione delle campagne svecchiandone i sistemi di gestione, ma fu assassinato nel 1911 da un rivoluzionario socialista — il punto di non ritorno per il regime zarista in Russia.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Focus calendario -->
+    <div class="ctx-section">
+      <h3 class="ctx-title">📅 Focus: il calendario giuliano e il calendario gregoriano</h3>
+      <div class="ctx-body">
+        <div class="ctx-box" style="border-left-color:var(--gold);">
+          <p>Prima del 1918, in Russia vigeva il <strong>calendario giuliano</strong>. In Europa occidentale vigeva invece il <strong>calendario gregoriano</strong>, così chiamato perché introdotto da papa Gregorio XIII nel 1582 con la bolla <em>Inter Gravissimas</em>. Il calendario giuliano-ortodosso era arretrato di <strong>13 giorni</strong> rispetto a quello gregoriano: per questo motivo le date della Rivoluzione Russa sono normalmente riportate secondo il calendario giuliano.</p>
+          <p>Così la "Rivoluzione di Febbraio" è del 23 febbraio (giuliano) = 8 marzo (gregoriano); la "Rivoluzione d'Ottobre" è del 25 ottobre (giuliano) = 7 novembre (gregoriano). Il calendario gregoriano fu introdotto da Lenin nell'<strong>febbraio 1918</strong>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CRONOLOGIA ── -->
+<section class="panel" id="panel-cronologia" role="tabpanel">
+  <div class="panel-inner">
+    <div class="sec-head">
+      <h2 class="sec-title">Cronologia</h2>
+      <span class="gold-line"></span>
+      <p class="sec-sub">Dalla Domenica di Sangue (1905) alla nascita dell'URSS (1922)</p>
+    </div>
+    <div class="tl-filters" id="tl-filters">
+      <button class="tl-filter on" data-cat="all">Tutti</button>
+      <button class="tl-filter" data-cat="svolta">Svolte decisive</button>
+      <button class="tl-filter" data-cat="politica">Politica</button>
+      <button class="tl-filter" data-cat="guerra">Guerra</button>
+      <button class="tl-filter" data-cat="economia">Economia</button>
+      <button class="tl-filter" data-cat="rivolta">Rivolte</button>
+      <button class="tl-filter" data-cat="violenza">Violenza</button>
+      <button class="tl-filter" data-cat="zarismo">Zarismo</button>
+    </div>
+    <div class="tl-list" id="tl-list"></div>
+  </div>
+</section>
+
+<!-- ── MAPPA ── -->
+<section class="panel" id="panel-mappa" role="tabpanel">
+  <div class="panel-inner">
+    <div class="sec-head">
+      <h2 class="sec-title">Mappa</h2>
+      <span class="gold-line"></span>
+      <p class="sec-sub">Luoghi chiave della Rivoluzione Russa e della Guerra Civile</p>
+    </div>
+    <div id="map-wrap">
+      <div id="the-map"></div>
+      <aside>
+        <div id="map-side"></div>
+        <div class="map-info-box" id="map-info">
+          <div class="map-info-nome" id="map-info-nome"></div>
+          <div class="map-info-desc" id="map-info-desc"></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ── PERSONAGGI ── -->
+<section class="panel" id="panel-personaggi" role="tabpanel">
+  <div class="panel-inner">
+    <div class="sec-head">
+      <h2 class="sec-title">Personaggi</h2>
+      <span class="gold-line"></span>
+      <p class="sec-sub">Figure chiave della Rivoluzione — clicca su una scheda per saperne di più</p>
+    </div>
+    <div class="pg-grid" id="pg-grid"></div>
+  </div>
+</section>
+
+<!-- ── IDEOLOGIA ── -->
+<section class="panel" id="panel-ideologia" role="tabpanel">
+  <div class="panel-inner">
+    <div class="sec-head">
+      <h2 class="sec-title">Ideologie e Correnti</h2>
+      <span class="gold-line"></span>
+      <p class="sec-sub">I fondamenti teorici delle diverse forze rivoluzionarie — clicca per espandere</p>
+    </div>
+    <div class="id-grid" id="id-grid"></div>
+  </div>
+</section>
+
+<!-- ── FAZIONI ── -->
+<section class="panel" id="panel-fazioni" role="tabpanel">
+  <div class="panel-inner">
+    <div class="sec-head">
+      <h2 class="sec-title">Partiti e Fazioni</h2>
+      <span class="gold-line"></span>
+      <p class="sec-sub">I principali schieramenti politici e militari della Rivoluzione Russa</p>
+    </div>
+    <div class="fz-grid" id="fz-grid"></div>
+  </div>
+</section>
+
+<!-- ── GUERRA CIVILE ── -->
+<section class="panel" id="panel-guerra-civile" role="tabpanel">
+  <div class="panel-inner">
+    <div class="sec-head">
+      <h2 class="sec-title">Guerra Civile</h2>
+      <span class="gold-line"></span>
+      <p class="sec-sub">Rossi contro Bianchi, 1918–1922</p>
+    </div>
+
+    <div class="gc-intro">
+      <p>Tra il 1918 e il 1922 la Russia fu devastata da una guerra civile che oppose l'<strong>Armata Rossa</strong> (bolscevichi) all'<strong>Esercito Bianco</strong> (una coalizione eterogenea di monarchici, liberali, socialisti moderati e forze straniere di 14 paesi). La guerra causò milioni di vittime — tra combattimenti, terrore, carestia ed epidemie — e forgiò definitivamente il regime bolscevico come sistema a partito unico.</p>
+    </div>
+
+    <div class="gc-cols">
+      <div class="gc-col">
+        <div class="gc-col-hdr" style="background:#9B1C14;">★ Armata Rossa — Fattori di vittoria</div>
+        <div class="gc-col-body">
+          <p><strong>Posizione geografica:</strong> i Rossi controllarono il cuore della Russia (Mosca, Pietrogrado) con le sue industrie e ferrovie, potendo spostare rapidamente le truppe.</p>
+          <p><strong>Organizzazione di Trotsky:</strong> la decisione di reclutare ex ufficiali zaristi come "specialisti militari" diede all'Armata Rossa competenze tattiche che i Bianchi non sapevano usare in modo coordinato.</p>
+          <p><strong>Programma politico:</strong> il Decreto sulla Terra aveva già conquistato i contadini. I Bianchi non offrirono mai una proposta agraria convincente.</p>
+          <p><strong>Terrore Rosso:</strong> la Čeka (polizia politica) represse spietatamente ogni opposizione interna.</p>
+        </div>
+      </div>
+      <div class="gc-col">
+        <div class="gc-col-hdr" style="background:#546E7A;">⬜ Esercito Bianco — Cause della sconfitta</div>
+        <div class="gc-col-body">
+          <p><strong>Divisioni interne:</strong> i Bianchi non avevano un programma politico comune. Monarchici, liberali e socialisti moderati litigavano su tutto: forma di governo, questione agraria, autonomia delle nazionalità.</p>
+          <p><strong>Questione agraria irrisolta:</strong> i contadini — la maggioranza della popolazione — preferirono i Rossi (che avevano dato loro la terra) ai Bianchi (che volevano restituirla ai latifondisti).</p>
+          <p><strong>Brutalità delle truppe:</strong> pogrom anti-ebraici e saccheggi nelle aree controllate dai Bianchi alienarono le popolazioni civili.</p>
+          <p><strong>Fronti disgiunti:</strong> Kolčak (Siberia), Denikin (sud), Wrangel (Crimea) e Judenič (nord-ovest) non si coordinarono mai efficacemente.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="gc-timeline">
+      <h3 class="gc-tl-title">Cronologia essenziale della Guerra Civile</h3>
+      <div class="gc-ev-list">
+        <div class="gc-ev"><span class="gc-ev-anno">1918 — genn.</span><span class="gc-ev-testo">Scioglimento dell'Assemblea Costituente. Inizio della resistenza anti-bolscevica organizzata.</span></div>
+        <div class="gc-ev"><span class="gc-ev-anno">1918 — mag.</span><span class="gc-ev-testo">Rivolta del Corpo cecoslovacco lungo la Transiberiana. Apre il fronte orientale.</span></div>
+        <div class="gc-ev"><span class="gc-ev-anno">1918 — lug.</span><span class="gc-ev-testo">Assassinio della famiglia Romanov a Ekaterinburg. Inizio del Terrore Rosso (settembre).</span></div>
+        <div class="gc-ev"><span class="gc-ev-anno">1918 — ago.</span><span class="gc-ev-testo">Sbarco alleato ad Arcangelo (nord) e Vladivostok (est). Attentat a Lenin di Fanny Kaplan.</span></div>
+        <div class="gc-ev"><span class="gc-ev-anno">1919</span><span class="gc-ev-testo">Offensiva di Kolčak in Siberia (fino a Ufa, primavera) — respinta dall'Armata Rossa (estate). Denikin raggiunge Orel (a 400 km da Mosca) — respinto (autunno). Giugno: fondazione della III Internazionale (Comintern).</span></div>
+        <div class="gc-ev"><span class="gc-ev-anno">1920 — gen.</span><span class="gc-ev-testo">Cattura e fucilazione di Kolčak a Irkutsk. Crollo del fronte siberiano bianco.</span></div>
+        <div class="gc-ev"><span class="gc-ev-anno">1920 — apr.–ott.</span><span class="gc-ev-testo">Guerra russo-polacca. L'Armata Rossa avanza fino a Varsavia, poi è respinta (Miracolo della Vistola). Pace di Riga: la Russia perde territori occidentali.</span></div>
+        <div class="gc-ev"><span class="gc-ev-anno">1920 — nov.</span><span class="gc-ev-testo">L'Armata Rossa conquista la Crimea. Sconfitta di Wrangel, ultimo generale bianco. Fine della guerra civile nel senso stretto.</span></div>
+        <div class="gc-ev"><span class="gc-ev-anno">1921 — mar.</span><span class="gc-ev-testo">Rivolta di Kronstadt: i marinai si ribellano. Repressa. Annuncio della NEP. Fine del "comunismo di guerra".</span></div>
+        <div class="gc-ev"><span class="gc-ev-anno">1922</span><span class="gc-ev-testo">Liquidazione dell'ultimo fronte (Estremo Oriente). 30 dicembre: fondazione dell'URSS.</span></div>
+      </div>
+    </div>
+
+    <!-- Comunismo di guerra -->
+    <div class="ctx-section" style="margin-top:2rem;">
+      <h3 class="ctx-title">Il comunismo di guerra (1918–1921)</h3>
+      <div class="ctx-body">
+        <p>Per sopravvivere alla guerra civile, il governo bolscevico adottò misure economiche di emergenza note come <strong>comunismo di guerra</strong>: nazionalizzazione di tutta l'industria, obbligo di lavoro per tutti, soppressione del commercio privato, requisizione forzata del grano dai contadini (<em>prodrazvërstka</em>). L'obiettivo era concentrare tutte le risorse disponibili sullo sforzo bellico.</p>
+        <p>Il risultato fu catastrofico sul piano economico e sociale: la produzione industriale crollò, i contadini smisero di coltivare più del necessario sapendo che il surplus sarebbe stato confiscato, la carestia dilagò (1921–22: circa 5 milioni di morti). Il comunismo di guerra non era un modello ideologico scelto consapevolmente, ma una risposta di emergenza — che però generò l'illusione, in molti bolscevichi, che si potesse passare direttamente al comunismo senza fasi intermedie.</p>
+        <div class="ctx-box">
+          <div class="ctx-box-title">📌 Prodrazvërstka</div>
+          <p>Letteralmente "requisizione del grano per quota". Le unità dell'Armata Rossa e i "comitati dei poveri" (kombedy) sequestrarono il grano dai villaggi, spesso con violenza. Chi resisteva veniva fucilato o deportato. La misura alienò profondamente i contadini — che pure avevano beneficiato del Decreto sulla Terra — e fu una delle cause della rivolta di Kronstadt.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Comintern -->
+    <div class="ctx-section">
+      <h3 class="ctx-title">La Terza Internazionale (Comintern) — marzo 1919</h3>
+      <div class="ctx-body">
+        <p>Nel marzo 1919, mentre infuriava la guerra civile, Lenin fondò a Mosca la <strong>III Internazionale Comunista (Comintern)</strong>. L'obiettivo era coordinare i partiti comunisti di tutto il mondo, applicando i principi leninisti di organizzazione e disciplina. A differenza della II Internazionale socialdemocratica (che si era spaccata con lo scoppio della guerra nel 1914), il Comintern era strutturato come un partito mondiale centralizzato, con i partiti nazionali come "sezioni" obbedenti alle direttive di Mosca.</p>
+        <p>Il Comintern si aspettava — e attivamente promosse — la rivoluzione in Europa: in Germania, in Ungheria (brevissima Repubblica Sovietica di Béla Kun, 1919), in Italia (biennio rosso 1919-20). Tutte fallirono. La speranza di Lenin che la rivoluzione si propagasse dall'Occidente industriale si rivelò infondata. Il Comintern rimase tuttavia uno strumento di controllo sovietico sui movimenti comunisti internazionali fino al 1943, quando Stalin lo sciolse come gesto di distensione verso gli Alleati.</p>
+      </div>
+    </div>
+
+    <!-- Kronstadt -->
+    <div class="ctx-section">
+      <h3 class="ctx-title">La rivolta di Kronstadt — marzo 1921</h3>
+      <div class="ctx-body">
+        <p>Nel febbraio-marzo 1921 i <strong>marinai della base navale di Kronstadt</strong> (isola nel Golfo di Finlandia) si ribellarono al governo bolscevico. Erano stati definiti "il fiore e l'orgoglio della Rivoluzione" da Trotsky stesso — molti erano veterani del 1917. Presentarono un programma di rivendicazioni:</p>
+        <div class="ctx-box">
+          <div class="ctx-box-title">Le richieste dei marinai di Kronstadt</div>
+          <p>1. Elezioni libere ai Soviet con voto segreto (senza controllo bolscevico)</p>
+          <p>2. Libertà di parola e di stampa per tutti i partiti socialisti</p>
+          <p>3. Libertà di riunione per sindacati e organizzazioni contadine</p>
+          <p>4. Fine delle requisizioni di grano ai contadini</p>
+        </div>
+        <p>Il governo bolscevico definì la rivolta una "congiura controrivoluzionaria delle guardie bianche". Trotsky ordinò la repressione: l'Armata Rossa — in parte guidata da giovani cadetti militari usati come forza di élite — attraversò il ghiaccio del Golfo di Finlandia e attaccò la fortezza. Dopo dieci giorni di combattimenti (7–18 marzo 1921), Kronstadt fu conquistata. Circa 20.000 marinai avevano partecipato alla rivolta; i sopravvissuti furono fucilati, deportati o fuggirono in Finlandia. La rivolta segnò la fine del comunismo di guerra: pochi giorni dopo, Lenin annunciò la <strong>Nuova Politica Economica (NEP)</strong>.</p>
+      </div>
+    </div>
+
+    <!-- NEP -->
+    <div class="ctx-section">
+      <h3 class="ctx-title">La Nuova Politica Economica (NEP) — 1921</h3>
+      <div class="ctx-body">
+        <p>La NEP sostituì le requisizioni forzate con un'imposta sul grano (<em>prodnalog</em>), permettendo ai contadini di vendere il surplus sul mercato. Il commercio privato fu rilegalizzato; piccole imprese poterono tornare in mani private. Solo la "lista alta" dell'economia — industria pesante, banche, trasporti — rimase in mano allo Stato.</p>
+        <p>La NEP era, nelle parole di Lenin, "un passo indietro per prenderne due avanti": una ritirata tattica necessaria per ricostruire l'economia devastata. Funzionò: entro il 1925 la produzione agricola e industriale aveva raggiunto i livelli prebellici. Ma la NEP creò anche tensioni politiche interne — i bolscevichi la vissero come una sconfitta ideologica — e nuove disuguaglianze sociali (i <em>nepman</em>, i nuovi commercianti privati). Sarà abbandonata da Stalin nel 1928 con il primo Piano Quinquennale e la collettivizzazione forzata.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── DOCUMENTI ── -->
+<section class="panel" id="panel-documenti" role="tabpanel">
+  <div class="panel-inner">
+    <div class="sec-head">
+      <h2 class="sec-title">Documenti</h2>
+      <span class="gold-line"></span>
+      <p class="sec-sub">Fonti primarie, manifesti e atti del potere sovietico — clicca per leggere</p>
+    </div>
+    <div class="doc-filters" id="doc-filters">
+      <button class="doc-filter on" data-cat="all">Tutti</button>
+      <button class="doc-filter" data-cat="zarismo">Zarismo e 1905</button>
+      <button class="doc-filter" data-cat="bolscevichi">Documenti Bolscevichi</button>
+      <button class="doc-filter" data-cat="decreti-sovietici">Decreti Sovietici</button>
+    </div>
+    <div class="doc-list" id="doc-list"></div>
+  </div>
+</section>
+
+<!-- ── L'URSS ── -->
+<section class="panel" id="panel-urss" role="tabpanel">
+  <div class="panel-inner">
+    <div class="sec-head">
+      <h2 class="sec-title">La Nascita dell'URSS</h2>
+      <span class="gold-line"></span>
+      <p class="sec-sub">30 dicembre 1922 — l'Unione delle Repubbliche Socialiste Sovietiche</p>
+    </div>
+
+    <div class="urss-lead">
+      <div class="urss-lead-title">Unione delle Repubbliche Socialiste Sovietiche</div>
+      <div class="urss-lead-text">Il 30 dicembre 1922 il I Congresso dei Soviet dell'URSS approvò il Trattato e la Dichiarazione sull'Unione. Nasceva il primo Stato socialista della storia: una federazione di repubbliche formalmente autonome, nella pratica unite dal potere assoluto del Partito Comunista. Lenin, colpito da ictus ripetuti, non partecipò ai festeggiamenti. Morirà il 21 gennaio 1924.</div>
+    </div>
+
+    <div class="urss-grid">
+      <div class="urss-card">
+        <div class="urss-card-icon">🏛</div>
+        <div class="urss-card-title">Struttura istituzionale</div>
+        <div class="urss-card-text">Formalmente, il potere apparteneva ai <strong>Soviet</strong> (consigli) a tutti i livelli. Il <strong>Congresso dei Soviet dell'URSS</strong> era l'organo supremo; tra le sessioni operava il <strong>VCIKs</strong> (Comitato Esecutivo Centrale). Il governo era il <strong>Sovnarkom</strong> (Consiglio dei Commissari del Popolo). Nella pratica, tutti questi organi erano controllati dal Partito Comunista.</div>
+      </div>
+      <div class="urss-card">
+        <div class="urss-card-icon">☭</div>
+        <div class="urss-card-title">Il Partito Comunista</div>
+        <div class="urss-card-text">Il Partito Comunista (bolscevichi) — PC(b)R — era l'unico partito legale dal 1921. Il suo <strong>Comitato Centrale</strong> e il <strong>Politburo</strong> (ristretto, 7-9 membri) prendevano le decisioni reali. Il <strong>Segretariato</strong>, guidato da Stalin dal 1922, controllava le nomine a tutti i livelli della burocrazia di Stato e di partito.</div>
+      </div>
+      <div class="urss-card">
+        <div class="urss-card-icon">⚖</div>
+        <div class="urss-card-title">La Čeka e il controllo sociale</div>
+        <div class="urss-card-text">La <strong>Čeka</strong> (Commissione Straordinaria), fondata nel dicembre 1917 e guidata da Feliks Dzeržinskij, era la polizia politica del regime. Responsabile del Terrore Rosso, degli arresti, delle esecuzioni sommarie e dei primi campi di concentramento (prototipo del Gulag). Sarà ribattezzata più volte: GPU, OGPU, NKVD, KGB.</div>
+      </div>
+      <div class="urss-card">
+        <div class="urss-card-icon">🌍</div>
+        <div class="urss-card-title">Politica delle nazionalità</div>
+        <div class="urss-card-text">Stalin, come Commissario alle Nazionalità, aveva elaborato la formula "nazionale nella forma, socialista nel contenuto": le repubbliche avevano proprie lingue e culture, ma erano unite da un'identica struttura politica e dal controllo del partito centrale. Il modello si rivelò più centralizzato che federale nella pratica.</div>
+      </div>
+    </div>
+
+    <div class="urss-repubbliche">
+      <div class="urss-rep-title">Le Repubbliche fondatrici dell'URSS (1922)</div>
+      <div class="rep-list">
+        <div class="rep-item"><span class="rep-dot"></span>Russia (RSFS Russa)</div>
+        <div class="rep-item"><span class="rep-dot"></span>Ucraina (RSS Ucraina)</div>
+        <div class="rep-item"><span class="rep-dot"></span>Bielorussia (RSS Bielorussa)</div>
+        <div class="rep-item"><span class="rep-dot"></span>Transcaucasia (RSFS — Georgia, Armenia, Azerbaigian)</div>
+      </div>
+      <p style="font-size:.78rem;color:var(--fg3);margin-top:.75rem;">L'URSS si espanse poi fino a 15 repubbliche. Finì il 25 dicembre 1991 con le dimissioni di Gorbaciov.</p>
+    </div>
+
+    <div class="urss-nep">
+      <div class="urss-nep-title">💰 La NEP (Nuova Politica Economica, 1921–1928)</div>
+      <div class="urss-nep-text">
+        Annunciata da Lenin nel marzo 1921 in risposta alla crisi economica e alla rivolta di Kronstadt, la NEP sostituì le requisizioni forzate con un'imposta in natura sui contadini, permettendo loro di vendere liberamente il surplus. Reintrodusse il commercio privato (i <em>nepmen</em>) e consentì piccole imprese private. La grande industria, le banche e i trasporti rimasero statali.<br><br>
+        La NEP rilanciò la produzione agricola e ridusse la mortalità da carestia, ma creò tensioni ideologiche: l'"arricchimento" contadino e commerciale sembrava contraddire il socialismo. Stalin abbandonò la NEP nel 1928-1929 con la collettivizzazione forzata, che causò milioni di morti (Holodomor in Ucraina).
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ MODAL PERSONAGGI ══════════════════════════ -->
+<div class="modal-bg" id="modal-bg" role="dialog" aria-modal="true" aria-labelledby="modal-nome">
+  <div class="modal">
+    <div class="modal-hdr">
+      <div class="pg-avatar" id="modal-avatar" style="width:52px;height:52px;font-size:1.05rem;"></div>
+      <div>
+        <div style="font-family:var(--font-serif);font-size:1.2rem;font-weight:600;color:var(--fg);" id="modal-nome"></div>
+        <div style="font-size:.76rem;color:var(--fg3);" id="modal-anni"></div>
+        <div id="modal-label-wrap" style="margin-top:.25rem;"></div>
+      </div>
+      <button class="modal-close" id="modal-close" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.75rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--fg3);margin-bottom:.3rem;" id="modal-ruolo"></p>
+      <div class="modal-bio" id="modal-bio"></div>
+      <dl class="modal-dati" id="modal-dati"></dl>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════ TTS ══════════════════════════ -->
+<div id="tts-bar">
+  <span id="tts-status"></span>
+  <button id="tts-btn" aria-label="Leggi ad alta voce">🔊</button>
+</div>
+
+<!-- ══════════════════════════ DATA ══════════════════════════ -->
+<script src="data/timeline.js"></script>
+<script src="data/personaggi.js"></script>
+<script src="data/luoghi.js"></script>
+<script src="data/ideologia.js"></script>
+<script src="data/fazioni.js"></script>
+<script src="data/documenti.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+/* ══════════════════════════════════════════════════════════
+   APP — La Rivoluzione Russa
+══════════════════════════════════════════════════════════ */
+
+// ─── THEME ───────────────────────────────────────────────
+const THEME_KEY = 'theme-rivoluzione-russa';
+(function(){
+  const t = localStorage.getItem(THEME_KEY);
+  if (t) document.documentElement.setAttribute('data-theme', t);
+})();
+document.getElementById('btn-theme').addEventListener('click', function(){
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem(THEME_KEY, next);
+});
+
+// ─── ALTA LEGGIBILITÀ ────────────────────────────────────
+const AL_KEY = 'al-rivoluzione-russa';
+const btnAL = document.getElementById('btn-al');
+if (localStorage.getItem(AL_KEY) === '1') {
+  document.body.classList.add('alta-leg');
+  btnAL.classList.add('active');
+  btnAL.setAttribute('aria-pressed', 'true');
+}
+btnAL.addEventListener('click', function(){
+  const on = document.body.classList.toggle('alta-leg');
+  btnAL.classList.toggle('active', on);
+  btnAL.setAttribute('aria-pressed', String(on));
+  localStorage.setItem(AL_KEY, on ? '1' : '0');
+});
+
+// ─── TTS ─────────────────────────────────────────────────
+let ttsUtterance = null;
+const ttsBtn = document.getElementById('tts-btn');
+const ttsStatus = document.getElementById('tts-status');
+ttsBtn.addEventListener('click', function(){
+  if (!window.speechSynthesis) { alert('Il browser non supporta la sintesi vocale.'); return; }
+  if (speechSynthesis.speaking) {
+    speechSynthesis.cancel();
+    ttsStatus.textContent = '';
+    ttsStatus.classList.remove('vis');
+    return;
+  }
+  const panel = document.querySelector('.panel.active');
+  const text = panel ? panel.innerText.replace(/\s+/g, ' ').trim() : '';
+  ttsUtterance = new SpeechSynthesisUtterance(text);
+  ttsUtterance.lang = 'it-IT';
+  ttsUtterance.rate = 0.92;
+  ttsUtterance.onend = () => { ttsStatus.textContent = ''; ttsStatus.classList.remove('vis'); };
+  speechSynthesis.speak(ttsUtterance);
+  ttsStatus.textContent = 'In ascolto…';
+  ttsStatus.classList.add('vis');
+});
+document.getElementById('btn-tts').addEventListener('click', function(){
+  ttsBtn.click();
+});
+
+// ─── TABS ────────────────────────────────────────────────
+let mapInited = false;
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected','true');
+    const t = btn.dataset.tab;
+    const panel = document.getElementById('panel-' + t);
+    if (panel) panel.classList.add('active');
+    if (t === 'mappa' && !mapInited) { initMap(); mapInited = true; }
+    if (speechSynthesis.speaking) speechSynthesis.cancel();
+  });
+});
+
+// ─── CRONOLOGIA ──────────────────────────────────────────
+function renderTimeline(filter) {
+  const list = document.getElementById('tl-list');
+  list.innerHTML = '';
+  TIMELINE.forEach(ev => {
+    const show = (filter === 'all' || ev.cat === filter);
+    const item = document.createElement('div');
+    item.className = 'tl-item ' + ev.cat + (show ? '' : ' hidden');
+    item.innerHTML = `
+      <div class="tl-meta">
+        <span class="tl-anno">${ev.anno}</span>
+        <span class="tl-data-str">${ev.data}</span>
+        <span class="tl-cat-badge ${ev.cat}">${ev.cat.charAt(0).toUpperCase()+ev.cat.slice(1)}</span>
+      </div>
+      <div class="tl-titolo">${ev.titolo}</div>
+      <div class="tl-desc">${ev.descrizione}</div>
+    `;
+    list.appendChild(item);
+  });
+}
+renderTimeline('all');
+document.getElementById('tl-filters').addEventListener('click', function(e){
+  const btn = e.target.closest('.tl-filter');
+  if (!btn) return;
+  document.querySelectorAll('.tl-filter').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  const cat = btn.dataset.cat;
+  document.querySelectorAll('.tl-item').forEach(item => {
+    if (cat === 'all' || item.classList.contains(cat)) {
+      item.classList.remove('hidden');
+    } else {
+      item.classList.add('hidden');
+    }
+  });
+});
+
+// ─── MAPPA ───────────────────────────────────────────────
+function initMap() {
+  const map = L.map('the-map', { center: [56, 40], zoom: 4 });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 18
+  }).addTo(map);
+
+  const catColors = {
+    'capitale': '#C8991A',
+    'rivolta': '#7B5EA7',
+    'violenza': '#8B1C14',
+    'zarismo': '#8B7355',
+    'guerra-civile': '#607D8B',
+    'intervento': '#1565C0',
+    'pace': '#2E7D32',
+    'anarchia': '#4A148C'
+  };
+
+  const side = document.getElementById('map-side');
+  const infoBox = document.getElementById('map-info');
+  const infoNome = document.getElementById('map-info-nome');
+  const infoDesc = document.getElementById('map-info-desc');
+  const markers = {};
+
+  LUOGHI.forEach(l => {
+    const col = catColors[l.cat] || '#9B1C14';
+    const icon = L.divIcon({
+      html: `<div style="background:${col};width:14px;height:14px;border-radius:50%;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,.4);"></div>`,
+      className: '',
+      iconSize: [14, 14],
+      iconAnchor: [7, 7]
+    });
+    const marker = L.marker([l.lat, l.lng], { icon }).addTo(map);
+    markers[l.id] = marker;
+
+    marker.on('click', () => showLuogo(l));
+
+    // Sidebar button
+    const btn = document.createElement('button');
+    btn.className = 'map-item-btn';
+    btn.dataset.id = l.id;
+    btn.innerHTML = `
+      <div class="map-item-nome">${l.nome}</div>
+      ${l.sottotitolo ? `<div class="map-item-sub">${l.sottotitolo}</div>` : ''}
+      <span class="map-item-cat" style="background:${col}22;color:${col};">${l.cat_label}</span>
+    `;
+    btn.addEventListener('click', () => {
+      map.setView([l.lat, l.lng], 6, { animate: true });
+      showLuogo(l);
+      document.querySelectorAll('.map-item-btn').forEach(b => b.classList.remove('sel'));
+      btn.classList.add('sel');
+    });
+    side.appendChild(btn);
+  });
+
+  function showLuogo(l) {
+    infoNome.textContent = l.nome + (l.sottotitolo ? ' ' + l.sottotitolo : '');
+    infoDesc.textContent = l.desc;
+    infoBox.classList.add('vis');
+    document.querySelectorAll('.map-item-btn').forEach(b => {
+      b.classList.toggle('sel', b.dataset.id === l.id);
+    });
+  }
+}
+
+// ─── PERSONAGGI ──────────────────────────────────────────
+const pgGrid = document.getElementById('pg-grid');
+PERSONAGGI.forEach(p => {
+  const card = document.createElement('div');
+  card.className = 'pg-card';
+  card.innerHTML = `
+    <div class="pg-header">
+      <div class="pg-avatar" style="background:${p.colore};">${p.iniziali}</div>
+      <div>
+        <div class="pg-nome">${p.nome}</div>
+        <div class="pg-cognome" style="color:${p.colore};">${p.cognome}</div>
+        <div class="pg-anni">${p.anni}</div>
+      </div>
+    </div>
+    <div class="pg-body">
+      <div class="pg-ruolo">${p.ruolo}</div>
+      <span class="pg-label" style="background:${p.colore};">${p.label}</span>
+      <div class="pg-bio-short">${p.bio}</div>
+    </div>
+  `;
+  card.addEventListener('click', () => openModal(p));
+  pgGrid.appendChild(card);
+});
+
+const modalBg = document.getElementById('modal-bg');
+const modalClose = document.getElementById('modal-close');
+function openModal(p) {
+  document.getElementById('modal-avatar').textContent = p.iniziali;
+  document.getElementById('modal-avatar').style.background = p.colore;
+  document.getElementById('modal-nome').textContent = p.nome + ' ' + p.cognome;
+  document.getElementById('modal-anni').textContent = p.anni;
+  document.getElementById('modal-label-wrap').innerHTML = `<span class="pg-label" style="background:${p.colore};font-size:.70rem;padding:.15rem .5rem;">${p.label}</span>`;
+  document.getElementById('modal-ruolo').textContent = p.ruolo;
+  document.getElementById('modal-bio').textContent = p.bio;
+  const dati = document.getElementById('modal-dati');
+  dati.innerHTML = p.dati_chiave.map(d => `<dt>${d.label}</dt><dd>${d.val}</dd>`).join('');
+  modalBg.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  modalBg.classList.remove('open');
+  document.body.style.overflow = '';
+}
+modalClose.addEventListener('click', closeModal);
+modalBg.addEventListener('click', e => { if (e.target === modalBg) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ─── IDEOLOGIA ───────────────────────────────────────────
+const idGrid = document.getElementById('id-grid');
+IDEOLOGIA.forEach(item => {
+  const card = document.createElement('div');
+  card.className = 'id-card';
+  card.innerHTML = `
+    <div class="id-header">
+      <div class="id-icona">${item.icona}</div>
+      <div style="flex:1;min-width:0;">
+        <div class="id-cat-label">${item.cat}</div>
+        <div class="id-titolo">${item.titolo}</div>
+        <div class="id-preview">${item.preview}</div>
+      </div>
+      <span class="id-toggle">▾</span>
+    </div>
+    <div class="id-body">
+      <div class="id-def">${item.def}</div>
+      ${item.contesto ? `<div class="id-ctx-label">Contesto storico</div><div class="id-ctx">${item.contesto}</div>` : ''}
+      ${item.citazione ? `<div class="id-quote">${item.citazione}</div>` : ''}
+    </div>
+  `;
+  card.querySelector('.id-header').addEventListener('click', () => {
+    card.classList.toggle('open');
+  });
+  idGrid.appendChild(card);
+});
+
+// ─── FAZIONI ─────────────────────────────────────────────
+const fzGrid = document.getElementById('fz-grid');
+FAZIONI.forEach(f => {
+  const card = document.createElement('div');
+  card.className = 'fz-card';
+  card.innerHTML = `
+    <div class="fz-stripe" style="background:${f.colore_hex};"></div>
+    <div class="fz-body">
+      <div class="fz-nome">${f.nome}</div>
+      <div class="fz-sotto">${f.sottotitolo}</div>
+      <dl class="fz-meta">
+        <dt>Periodo</dt><dd>${f.periodo}</dd>
+        <dt>Posizione</dt><dd>${f.posizione}</dd>
+        <dt>Base sociale</dt><dd>${f.base_sociale}</dd>
+        <dt>Leader</dt><dd>${f.leader}</dd>
+      </dl>
+      <div class="fz-pos-label">Posizioni principali</div>
+      <ul class="fz-pos-list">
+        ${f.posizioni.map(pos => `<li>${pos}</li>`).join('')}
+      </ul>
+      <div class="fz-esito">
+        <div class="fz-esito-label">Esito storico</div>
+        ${f.esito}
+      </div>
+    </div>
+  `;
+  fzGrid.appendChild(card);
+});
+
+// ─── DOCUMENTI ───────────────────────────────────────────
+function renderDocumenti(filter) {
+  const list = document.getElementById('doc-list');
+  list.innerHTML = '';
+  DOCUMENTI.forEach(doc => {
+    const show = (filter === 'all' || doc.cat === filter);
+    const card = document.createElement('div');
+    card.className = 'doc-card' + (show ? '' : ' hidden');
+    card.dataset.cat = doc.cat;
+    card.innerHTML = `
+      <div class="doc-header">
+        <div>
+          <div class="doc-titolo">${doc.titolo}</div>
+          <div class="doc-meta">${doc.data} · ${doc.autore}</div>
+        </div>
+        <span class="doc-cat-badge">${doc.cat_label}</span>
+      </div>
+      <div class="doc-body">
+        <div class="doc-testo">${doc.testo}</div>
+        <div class="doc-commento-label">Commento storiografico</div>
+        <div class="doc-commento">${doc.commento}</div>
+      </div>
+    `;
+    card.querySelector('.doc-header').addEventListener('click', () => {
+      card.classList.toggle('open');
+    });
+    list.appendChild(card);
+  });
+}
+renderDocumenti('all');
+document.getElementById('doc-filters').addEventListener('click', function(e){
+  const btn = e.target.closest('.doc-filter');
+  if (!btn) return;
+  document.querySelectorAll('.doc-filter').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  const cat = btn.dataset.cat;
+  document.querySelectorAll('.doc-card').forEach(card => {
+    if (cat === 'all' || card.dataset.cat === cat) {
+      card.classList.remove('hidden');
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+});
+</script>
+</body>
+</html>
