@@ -1724,7 +1724,9 @@ PERSONAGGI.forEach(p => {
   card.className = 'pg-card';
   card.innerHTML = `
     <div class="pg-header">
-      <div class="pg-avatar" style="background:${p.colore};">${p.iniziali}</div>
+      ${p.img
+        ? `<div class="pg-avatar" style="background:${p.colore};overflow:hidden;padding:0;"><img src="${p.img}" alt="${p.nome} ${p.cognome}" style="width:100%;height:100%;object-fit:cover;object-position:center top;display:block;" onerror="this.parentElement.innerHTML='${p.iniziali}';this.parentElement.style.padding=''"></div>`
+        : `<div class="pg-avatar" style="background:${p.colore};">${p.iniziali}</div>`}
       <div>
         <div class="pg-nome">${p.nome}</div>
         <div class="pg-cognome" style="color:${p.colore};">${p.cognome}</div>
