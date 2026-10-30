@@ -1745,9 +1745,8 @@ const modalClose = document.getElementById('modal-close');
 function openModal(p) {
   const avatarEl = document.getElementById('modal-avatar');
   if (p.img) {
-    avatarEl.innerHTML = `<img src="${p.img}" alt="${p.nome} ${p.cognome}" class="pers-modal-photo" style="width:52px;height:52px;margin:0;" onerror="this.parentElement.innerHTML='';this.parentElement.textContent='${p.iniziali}';this.parentElement.style.background='${p.colore}';">`;
+    avatarEl.innerHTML = `<img src="${p.img}" alt="${p.nome} ${p.cognome}" class="pers-modal-photo" style="width:52px;height:52px;margin:0;">`;
     avatarEl.style.background = 'transparent';
-    avatarEl.textContent = '';
   } else {
     avatarEl.innerHTML = '';
     avatarEl.textContent = p.iniziali;
