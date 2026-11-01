@@ -2,7 +2,7 @@
 const PERSONAGGI = [
   {
     id: 'p01',
-    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Nicolas_II_de_russie.jpg/240px-Nicolas_II_de_russie.jpg',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/54/Nicolas_II_de_russie.jpg/320px-Nicolas_II_de_russie.jpg',
     imgCredito: 'Foto: Boissonnas & Eggler (ante 1923) · Dominio pubblico · <a href="https://commons.wikimedia.org/wiki/File:Nicolas_II_de_russie.jpg" target="_blank" rel="noopener">Wikimedia Commons</a>',
     nome: 'Nicola II',
     cognome: 'Romanov',
@@ -59,7 +59,7 @@ const PERSONAGGI = [
   },
   {
     id: 'p04',
-    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Alexander_Kerensky_LOC_hec_24462.jpg/240px-Alexander_Kerensky_LOC_hec_24462.jpg',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Alexander_Kerensky_LOC_hec_24462.jpg/320px-Alexander_Kerensky_LOC_hec_24462.jpg',
     imgCredito: 'Foto: Library of Congress (ante 1923) · Dominio pubblico · <a href="https://commons.wikimedia.org/wiki/File:Alexander_Kerensky_LOC_hec_24462.jpg" target="_blank" rel="noopener">Wikimedia Commons</a>',
     nome: 'Aleksandr Fëdorovič',
     cognome: 'Kerenskij',
@@ -97,7 +97,7 @@ const PERSONAGGI = [
   },
   {
     id: 'p06',
-    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Georgi_Plekhanov.jpg/240px-Georgi_Plekhanov.jpg',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Georgi_Plekhanov.jpg/320px-Georgi_Plekhanov.jpg',
     imgCredito: 'Foto: autore sconosciuto (ante 1918) · Dominio pubblico · <a href="https://commons.wikimedia.org/wiki/File:Georgi_Plekhanov.jpg" target="_blank" rel="noopener">Wikimedia Commons</a>',
     nome: 'Georgij Valentinovič',
     cognome: 'Plechanov',
@@ -116,7 +116,7 @@ const PERSONAGGI = [
   },
   {
     id: 'p07',
-    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Viktor_Chernov_%281873-1952%29%2C_Russian_revolutionary_%28small%29.jpg/240px-Viktor_Chernov_%281873-1952%29%2C_Russian_revolutionary_%28small%29.jpg',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Viktor_Chernov_%281873-1952%29%2C_Russian_revolutionary_%28small%29.jpg/320px-Viktor_Chernov_%281873-1952%29%2C_Russian_revolutionary_%28small%29.jpg',
     imgCredito: 'Foto: autore sconosciuto · Dominio pubblico · <a href="https://commons.wikimedia.org/wiki/File:Viktor_Chernov_(1873-1952),_Russian_revolutionary_(small).jpg" target="_blank" rel="noopener">Wikimedia Commons</a>',
     nome: 'Viktor Michajlovič',
     cognome: 'Černov',
@@ -135,7 +135,7 @@ const PERSONAGGI = [
   },
   {
     id: 'p08',
-    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Kolchak_in_1919.jpg/240px-Kolchak_in_1919.jpg',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/Kolchak_in_1919.jpg/320px-Kolchak_in_1919.jpg',
     imgCredito: 'Foto: autore sconosciuto (1919) · Dominio pubblico · <a href="https://commons.wikimedia.org/wiki/File:Kolchak_in_1919.jpg" target="_blank" rel="noopener">Wikimedia Commons</a>',
     nome: 'Aleksandr Vasil\'evič',
     cognome: 'Kolčak',
@@ -154,7 +154,7 @@ const PERSONAGGI = [
   },
   {
     id: 'p09',
-    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Makhno_en_1918.JPG/240px-Makhno_en_1918.JPG',
+    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Makhno_en_1918.JPG/320px-Makhno_en_1918.JPG',
     imgCredito: 'Foto: autore sconosciuto (1918) · Dominio pubblico · <a href="https://commons.wikimedia.org/wiki/File:Makhno_en_1918.JPG" target="_blank" rel="noopener">Wikimedia Commons</a>',
     nome: 'Nestor Ivanovič',
     cognome: 'Machno',
